@@ -267,10 +267,10 @@
                         <form id="checkForm" onsubmit="handleCheck(event)" class="space-y-4">
                             <div><label class="block text-neon-blue text-sm font-bold mb-1">1. 選擇預計日期</label><p id="dateBlockTip" class="text-xs text-blue-400 mb-2"></p><div class="relative"><input type="date" id="dateInput" 
        onchange="checkLogic()" 
-       onclick="this.showPicker()" 
-       oninput="if(this.value && this.value < this.min) { alert('⚠️ 此日期無法預約 (需符合籌備期)'); this.value=''; }"
+       onfocus="setDatePickerMin()" 
+       onblur="checkLogic()"
        required 
-       class="w-full bg-black border border-zinc-700 text-white rounded-lg p-3 focus:border-neon-blue focus:outline-none cursor-pointer"></div><p id="dayTypeLabel" class="text-xs text-gray-500 mt-1 text-right"></p><p id="dateWarning" class="text-neon-pink text-xs mt-1 hidden font-bold"></p></div>
+       class="w-full bg-black border border-zinc-700 text-white rounded-lg p-3 focus:border-neon-blue focus:outline-none cursor-pointer">></div><p id="dayTypeLabel" class="text-xs text-gray-500 mt-1 text-right"></p><p id="dateWarning" class="text-neon-pink text-xs mt-1 hidden font-bold"></p></div>
                             <div>
                                 <label class="block text-neon-blue text-sm font-bold mb-1">2. 選擇時段</label>
                                 <div class="grid grid-cols-3 gap-2 mb-4" id="standardSlots">
@@ -510,44 +510,37 @@
         function closeSubModal() { document.getElementById('subPlanModal').classList.add('hidden'); }
 
         function setDatePickerMin() {
-            // 1. 取得今日物件
             const today = new Date();
+            // 預設 14 天，如果是租借或會議則 2 天
+            const isShortTerm = (currentPlan.type === 'rental' || currentPlan.key === 'meeting');
+            const leadDays = isShortTerm ? 2 : 14; 
             
-            // 2. 判斷前置期 (純場租/會議=2天，其他=14天)
-            const leadDays = (currentPlan.type === 'rental' || currentPlan.key === 'meeting') ? 2 : 14; 
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() + leadDays);
             
-            // 3. 計算「最早可預約日」
-            const targetDate = new Date(today);
-            targetDate.setDate(today.getDate() + leadDays);
-            
-            // 4. 格式化為 YYYY-MM-DD (確保雙位數補0)
-            const yyyy = targetDate.getFullYear();
-            const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(targetDate.getDate()).padStart(2, '0');
+            const yyyy = minDate.getFullYear();
+            const mm = String(minDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(minDate.getDate()).padStart(2, '0');
             const minDateStr = `${yyyy}-${mm}-${dd}`;
             
-            // 5. 強制寫入 min 屬性
             const dateInput = document.getElementById("dateInput");
             if (dateInput) {
-                dateInput.setAttribute("min", minDateStr);
-                
-                // 雙重檢查：如果原本殘留的日期不合規，直接清空
-                if (dateInput.value && dateInput.value < minDateStr) {
-                    dateInput.value = "";
-                }
+                dateInput.min = minDateStr;
             }
             
-            // 6. 更新文字提示
+            // 更新文字提示
             const tipEl = document.getElementById("dateBlockTip");
             if(tipEl) {
-                if(currentPlan.type === 'rental' || currentPlan.key === 'meeting') {
-                    tipEl.innerHTML = `ℹ️ 此方案需提前 2 天預約 <span class="text-gray-500">(${minDateStr} 後可用)</span>`;
+                if(isShortTerm) {
+                    tipEl.innerText = `ℹ️ 此方案需提前 2 天預約 (${minDateStr} 起)`;
                     tipEl.className = "text-xs text-blue-400 mb-2";
                 } else {
-                    tipEl.innerHTML = `ℹ️ 包套方案需提前 14 天預約 <span class="text-gray-500">(${minDateStr} 後可用)</span>`;
+                    tipEl.innerText = `ℹ️ 包套方案需提前 14 天預約 (${minDateStr} 起)`;
                     tipEl.className = "text-xs text-neon-pink mb-2";
                 }
             }
+            
+            return minDateStr;
         }
 
         function selectSlot(mode) {
@@ -650,59 +643,49 @@
         }
 
         function checkLogic() {
-            const dateVal = document.getElementById('dateInput').value;
+            const dateInput = document.getElementById('dateInput');
+            const dateVal = dateInput.value;
+            const timeSlot = document.getElementById('timeSlot').value;
+            const customContainer = document.getElementById('customTimeContainer');
+            const submitBtn = document.getElementById('submitBtn');
             const dayTypeLabel = document.getElementById('dayTypeLabel');
             const dateWarning = document.getElementById('dateWarning');
-            const submitBtn = document.getElementById('submitBtn'); // 取得按鈕
-            const startTimeVal = document.getElementById('startTime').value;
 
-            let isDateValid = false; // 日期是否合規旗標
-
-            // 1. 判斷平假日
-            isWeekend = isPeakTime(dateVal, currentSlotMode, startTimeVal);
-
+            // ★ 強力防呆：檢查日期是否合法
             if(dateVal) {
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                const checkDate = new Date(dateVal);
+                // 重新取得限制日期
+                const minDateStr = setDatePickerMin(); 
                 
-                const diffTime = checkDate - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                const leadDays = (currentPlan.type === 'rental' || currentPlan.key === 'meeting') ? 2 : 14;
-
-                // 檢查日期前置期
-                if (diffDays < leadDays) {
-                    dateWarning.innerHTML = `⛔ 此方案需提前 ${leadDays} 天預約 <br>急需請電洽：<a href="tel:0932828922" class="underline">0932-828922</a>`;
-                    dateWarning.classList.remove('hidden');
-                    isDateValid = false; // 日期無效
-                } else {
-                    dateWarning.classList.add('hidden');
-                    isDateValid = true; // 日期有效
+                // 如果選的日期 < 最小允許日期
+                if (dateVal < minDateStr) {
+                    alert(`⚠️ 日期無效！\n此方案需要提前預約。\n請選擇 ${minDateStr} 之後的日期。`);
+                    dateInput.value = ""; // ★ 直接清空客人的選擇
+                    dayTypeLabel.innerText = "";
+                    submitBtn.disabled = true;
+                    return; // 結束函式
                 }
 
-                // 更新價格顯示
-                let currentPrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+                // 日期合法，繼續判斷平假日
+                const day = new Date(dateVal).getDay();
+                isWeekend = (day === 0 || day === 6); 
                 
-                if (currentSlotMode === 'allday') {
-                    if (currentPlan.type === 'rental') currentPrice = isWeekend ? 36000 : 20000;
-                    else if (currentPlan.key === 'meeting') currentPrice = isWeekend ? 40000 : 28000;
-                }
-
-                const dayText = isWeekend ? "假日(或週五晚)" : "平日";
-                dayTypeLabel.innerText = (currentPrice === 0) ? "依專人報價" : `${dayText}計價，方案基本費：$${currentPrice.toLocaleString()}`;
+                const currentPrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+                dayTypeLabel.innerText = (currentPrice === 0) ? "依專人報價" : `${isWeekend?"假日":"平日"}計價，方案基本費：$${currentPrice.toLocaleString()}`;
                 
-                if (currentSlotMode === 'custom') updateEndTime();
-            } else {
-                isDateValid = false; // 沒選日期
+                if (timeSlot === 'custom') updateEndTime();
+                
+                // 隱藏舊的警告
+                dateWarning.classList.add('hidden');
             }
 
-            // ★ 核心修改：控制按鈕鎖定狀態
-            // 條件：(日期有效) AND (已選擇時段)
-            if (isDateValid && currentSlotMode) {
-                submitBtn.disabled = false; // 解鎖
+            // 時段檢查
+            if (timeSlot === 'custom') {
+                customContainer.classList.remove('hidden');
+                submitBtn.disabled = false;
             } else {
-                submitBtn.disabled = true;  // 鎖定
+                customContainer.classList.add('hidden');
+                // 如果有選按鈕時段，開啟送出；否則鎖定
+                submitBtn.disabled = !currentSlotMode;
             }
         }
 

@@ -282,7 +282,7 @@
                                     <p id="durationWarning" class="text-neon-pink text-xs mt-2 hidden font-bold"></p>
                                 </div>
                             </div>
-                            <button id="submitBtn" type="submit" class="w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] transition shadow-lg mt-4 active:scale-95">查詢空檔 <i class="fas fa-search ml-2"></i></button>
+                            <button id="submitBtn" type="submit" class="w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] transition shadow-lg mt-4 active:scale-95 cursor-pointer">查詢空檔 <i class="fas fa-search ml-2"></i></button>
                         </form>
                     </div>
 
@@ -619,31 +619,40 @@
             const dateVal = document.getElementById('dateInput').value;
             const dayTypeLabel = document.getElementById('dayTypeLabel');
             const dateWarning = document.getElementById('dateWarning');
+            const startTimeVal = document.getElementById('startTime').value;
+
+            // 1. 判斷平假日
+            isWeekend = isPeakTime(dateVal, currentSlotMode, startTimeVal);
 
             if(dateVal) {
                 const today = new Date();
                 today.setHours(0,0,0,0);
                 const checkDate = new Date(dateVal);
-                const day = checkDate.getDay();
-                isWeekend = (day === 0 || day === 6); 
                 
                 const diffTime = checkDate - today;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
                 const leadDays = (currentPlan.type === 'rental' || currentPlan.key === 'meeting') ? 2 : 14;
 
+                // 檢查日期是否太趕
                 if (diffDays < leadDays) {
-                    dateWarning.innerHTML = `⛔ 需 ${leadDays} 天前預約 <br>急需請電洽：<a href="tel:0932828922" class="underline">0932-828922</a>`;
+                    dateWarning.innerHTML = `⛔ 此方案需提前 ${leadDays} 天預約 <br>急需請電洽：<a href="tel:0932828922" class="underline">0932-828922</a>`;
                     dateWarning.classList.remove('hidden');
-                    // 這裡保留鎖定，因為日期不對是真的不能查
-                    // 但不鎖按鈕，改為 handleCheck 擋
-                    return; 
+                    // 注意：這裡不再鎖按鈕，改由按下按鈕時(handleCheck)擋下
                 } else {
                     dateWarning.classList.add('hidden');
                 }
 
-                const currentPrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
-                dayTypeLabel.innerText = (currentPrice === 0) ? "依專人報價" : `${isWeekend?"假日":"平日"}計價，方案基本費：$${currentPrice.toLocaleString()}`;
+                // 更新價格顯示
+                let currentPrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+                
+                if (currentSlotMode === 'allday') {
+                    if (currentPlan.type === 'rental') currentPrice = isWeekend ? 36000 : 20000;
+                    else if (currentPlan.key === 'meeting') currentPrice = isWeekend ? 40000 : 28000;
+                }
+
+                const dayText = isWeekend ? "假日(或週五晚)" : "平日";
+                dayTypeLabel.innerText = (currentPrice === 0) ? "依專人報價" : `${dayText}計價，方案基本費：$${currentPrice.toLocaleString()}`;
                 
                 if (currentSlotMode === 'custom') updateEndTime();
             }
@@ -731,35 +740,37 @@
         function handleCheck(e) {
             e.preventDefault();
             const dateVal = document.getElementById('dateInput').value;
+            const dateWarning = document.getElementById('dateWarning');
             
-            // ★ 手機版防呆提示
+            // 1. 檢查日期
             if(!dateVal) { 
-                alert("⚠️ 請先點擊上方日期欄位，選擇您的預約日期！"); 
+                alert("⚠️ 請先點擊日期欄位，選擇預約日期！"); 
                 return; 
             }
             
-            // ★ 這裡會擋住沒選時段的人，並明確告知
+            // 2. 檢查日期是否符合規定 (看有沒有紅字警告)
+            if (!dateWarning.classList.contains('hidden')) {
+                alert("⚠️ 您選擇的日期太近了，無法線上預約。\n急單請直接撥打客服電話：0932-828-922");
+                return;
+            }
+
+            // 3. 檢查時段
             if(!currentSlotMode) { 
-                alert("⚠️ 請點擊選擇一個時段！\n(例如：午場、晚場，或使用自訂時間)"); 
+                alert("⚠️ 請選擇一個時段！\n(點選 午場、晚場 按鈕，或設定自訂時間)"); 
                 return; 
             }
 
-            // --- 以下維持原本程式碼 ---
             const startTimeVal = document.getElementById('startTime').value;
-                     
-            // 1. 確認平假日 (週五 16:00 規則)
+            
+            // 再次確認平假日
             isWeekend = isPeakTime(dateVal, currentSlotMode, startTimeVal);
 
-            // 2. 計算方案價格
+            // 計算方案價格
             bookingData.planPrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
             
-            // 3. 全日包場特殊定價覆寫
             if (currentSlotMode === 'allday') {
-                if (currentPlan.type === 'rental') {
-                    bookingData.planPrice = isWeekend ? 36000 : 20000;
-                } else if (currentPlan.key === 'meeting') {
-                    bookingData.planPrice = isWeekend ? 40000 : 28000;
-                }
+                if (currentPlan.type === 'rental') bookingData.planPrice = isWeekend ? 36000 : 20000;
+                else if (currentPlan.key === 'meeting') bookingData.planPrice = isWeekend ? 40000 : 28000;
             }
 
             let reqStart = "", reqEnd = "", timeText = "";
@@ -788,7 +799,7 @@
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 查詢中...';
-            btn.disabled = true;
+            btn.disabled = true; // 送出後才鎖定，防止重複按
             
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('recommendationArea').classList.add('hidden');
@@ -821,7 +832,7 @@
                     console.error('Error:', error);
                     btn.disabled = false;
                     btn.innerHTML = originalText;
-                    alert("查詢失敗，請檢查網路或稍後再試。");
+                    alert("查詢連線失敗，請檢查網路或稍後再試。");
                 });
         }
 

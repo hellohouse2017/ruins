@@ -282,7 +282,7 @@
                                     <p id="durationWarning" class="text-neon-pink text-xs mt-2 hidden font-bold"></p>
                                 </div>
                             </div>
-                            <button id="submitBtn" type="submit" class="w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] transition shadow-lg mt-4 active:scale-95 cursor-pointer">查詢空檔 <i class="fas fa-search ml-2"></i></button>
+                            <button id="submitBtn" type="submit" class="w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] transition shadow-lg mt-4 active:scale-95 cursor-pointer disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed disabled:shadow-none" disabled>查詢空檔 <i class="fas fa-search ml-2"></i></button>
                         </form>
                     </div>
 
@@ -619,7 +619,10 @@
             const dateVal = document.getElementById('dateInput').value;
             const dayTypeLabel = document.getElementById('dayTypeLabel');
             const dateWarning = document.getElementById('dateWarning');
+            const submitBtn = document.getElementById('submitBtn'); // 取得按鈕
             const startTimeVal = document.getElementById('startTime').value;
+
+            let isDateValid = false; // 日期是否合規旗標
 
             // 1. 判斷平假日
             isWeekend = isPeakTime(dateVal, currentSlotMode, startTimeVal);
@@ -634,13 +637,14 @@
                 
                 const leadDays = (currentPlan.type === 'rental' || currentPlan.key === 'meeting') ? 2 : 14;
 
-                // 檢查日期是否太趕
+                // 檢查日期前置期
                 if (diffDays < leadDays) {
                     dateWarning.innerHTML = `⛔ 此方案需提前 ${leadDays} 天預約 <br>急需請電洽：<a href="tel:0932828922" class="underline">0932-828922</a>`;
                     dateWarning.classList.remove('hidden');
-                    // 注意：這裡不再鎖按鈕，改由按下按鈕時(handleCheck)擋下
+                    isDateValid = false; // 日期無效
                 } else {
                     dateWarning.classList.add('hidden');
+                    isDateValid = true; // 日期有效
                 }
 
                 // 更新價格顯示
@@ -655,6 +659,16 @@
                 dayTypeLabel.innerText = (currentPrice === 0) ? "依專人報價" : `${dayText}計價，方案基本費：$${currentPrice.toLocaleString()}`;
                 
                 if (currentSlotMode === 'custom') updateEndTime();
+            } else {
+                isDateValid = false; // 沒選日期
+            }
+
+            // ★ 核心修改：控制按鈕鎖定狀態
+            // 條件：(日期有效) AND (已選擇時段)
+            if (isDateValid && currentSlotMode) {
+                submitBtn.disabled = false; // 解鎖
+            } else {
+                submitBtn.disabled = true;  // 鎖定
             }
         }
 
@@ -986,28 +1000,17 @@
         }
 
         // ★ V35 FIX: 使用萬用複製函式
-        // ★ V36 FIX: 加入姓名電話驗證
         function sendFinalToLine() {
             // 1. 取得輸入值
             const name = document.getElementById('guestName').value.trim();
             const phone = document.getElementById('guestPhone').value.trim();
 
-            // 2. 驗證姓名
-            if (!name) {
-                alert("❌ 請填寫「預約人姓名」，方便我們為您登記！");
-                document.getElementById('guestName').focus();
-                return;
-            }
-
-            // 3. 驗證台灣手機 (09開頭 + 8位數字)
+            // 2. 驗證
+            if (!name) { alert("❌ 請填寫「預約人姓名」"); document.getElementById('guestName').focus(); return; }
             const phoneRegex = /^09\d{8}$/;
-            if (!phoneRegex.test(phone)) {
-                alert("❌ 請填寫正確的「台灣手機號碼」 (09開頭共10碼)");
-                document.getElementById('guestPhone').focus();
-                return;
-            }
+            if (!phoneRegex.test(phone)) { alert("❌ 請填寫正確的「台灣手機號碼」"); document.getElementById('guestPhone').focus(); return; }
 
-            // 4. 組合訊息
+            // 3. 組合訊息
             let msg = `您好！我想預約 RUINS BAR 廢墟場地 🥂\n\n`;
             msg += `👤 姓名：${name}\n`;
             msg += `📱 電話：${phone}\n`;
@@ -1034,16 +1037,16 @@
                 }); 
             } 
             
-            if(bookingData.planPrice === 0) { 
-                msg += `\n💰 預估總價：待專人報價\n`; 
-            } else { 
-                msg += `\n💰 預估總價：NT$ ${bookingData.finalTotal.toLocaleString()}\n`; 
-            }
-            
+            if(bookingData.planPrice === 0) { msg += `\n💰 預估總價：待專人報價\n`; } 
+            else { msg += `\n💰 預估總價：NT$ ${bookingData.finalTotal.toLocaleString()}\n`; }
             msg += `\n請協助確認檔期與最終報價，謝謝！`;
             
-            // 5. 執行複製與跳轉
+            // 4. 執行複製
             copyToClipboard(msg).then(() => {
+                // ★ 修改處：複製成功後，先關閉後面的預約表單
+                closeModal(); 
+                
+                // 再顯示成功彈窗
                 document.getElementById('copySuccessModal').classList.remove('hidden');
             }).catch(() => {
                 alert("複製失敗，請手動截圖");
@@ -1051,7 +1054,11 @@
             });
         }
 
-        function goToLine() { window.location.href = LINE_DEEP_LINK; }
+        function goToLine() {
+            // ★ 修改處：點擊後先關閉提示窗，再跳轉
+            closeCopyModal();
+            window.location.href = LINE_DEEP_LINK;
+        }
         function closeCopyModal() { document.getElementById('copySuccessModal').classList.add('hidden'); }
         function directLine() { window.location.href = LINE_DEEP_LINK; }
     </script>

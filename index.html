@@ -33,17 +33,18 @@
         input[type="date"] { position: relative; font-size: 1.1rem; }
         input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         
+        /* 加購按鈕樣式 */
         .addon-btn.selected { border-color: #00f3ff; background-color: rgba(0, 243, 255, 0.1); color: white; }
         .addon-btn.selected .check-icon { opacity: 1; background-color: #00f3ff; color: black; }
         .addon-btn.included { border-color: #06c755; background-color: rgba(6, 199, 85, 0.1); color: #88ffaa; cursor: default; }
         
+        /* 卡片特效 */
         .plan-card { transition: all 0.3s ease; }
         .plan-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
         .plan-card:hover img { transform: scale(1.05); }
         .plan-card img { transition: transform 0.8s ease; }
         .wedding-card:hover { border-color: #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
 
-        .gallery-item { break-inside: avoid; margin-bottom: 1rem; }
         .sticky-btn { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background-color: #06c755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 40; transition: all 0.3s ease; text-decoration: none; cursor: pointer; animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(6, 199, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0); } }
         
@@ -57,9 +58,19 @@
         .slot-btn:hover { border-color: #666; color: white; }
         .slot-btn.active { background-color: rgba(0, 243, 255, 0.15); border-color: #00f3ff; color: #00f3ff; font-weight: bold; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
         .slot-btn span { font-size: 0.75rem; font-weight: normal; opacity: 0.8; }
+        
+        /* Loading Overlay */
+        #loadingOverlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px); transition: opacity 0.5s; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="font-sans antialiased selection:bg-neon-pink selection:text-white pb-24">
+
+    <div id="loadingOverlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-neon-pink mb-4"></div>
+        <p class="text-white text-lg font-bold">正在讀取最新方案...</p>
+        <p class="text-gray-400 text-sm mt-2">Connecting to Google Database</p>
+    </div>
 
     <nav class="fixed w-full z-50 bg-ruin-dark/95 backdrop-blur-md border-b border-white/10 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,7 +82,6 @@
                     <div class="ml-10 flex items-baseline space-x-6">
                         <a href="#plans-section" class="text-neon-blue hover:text-white transition px-3 py-2 rounded-md text-sm font-bold border border-neon-blue cursor-pointer"><i class="fas fa-calendar-check mr-1"></i> 方案預約</a>
                         <a href="#gallery" class="hover:text-neon-pink transition px-3 py-2 rounded-md text-sm font-medium">實錄</a>
-                        <a href="#video" class="hover:text-neon-pink transition px-3 py-2 rounded-md text-sm font-medium">影音</a>
                         <a href="#reviews" class="hover:text-neon-pink transition px-3 py-2 rounded-md text-sm font-medium">好評</a>
                     </div>
                 </div>
@@ -98,151 +108,51 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
                 <div onclick="handleCardClick('proposal')" class="plan-card cursor-pointer group relative rounded-2xl overflow-hidden border-2 border-neon-pink/50 shadow-[0_0_30px_rgba(255,0,85,0.15)] hover:border-neon-pink bg-zinc-900 flex flex-col">
                     <div class="h-80 md:h-96 overflow-hidden relative w-full">
-                        <img src="images/proposal-cover.jpg" alt="高雄求婚佈置" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/50 to-transparent h-32"></div>
-                        <div class="absolute bottom-6 left-8">
+                        <img src="images/proposal-cover.jpg" onerror="this.src='https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1000'" class="w-full h-full object-cover">
+                        <div class="absolute bottom-6 left-8 z-10">
                             <div class="text-white font-bold text-2xl mb-1 flex items-center"><i class="fas fa-heart text-neon-pink mr-3"></i> 浪漫求婚包場</div>
-                            <p class="text-neon-pink text-xl font-bold">平日 $48,000 / 假日 $52,000 起</p>
                         </div>
                     </div>
                     <div class="p-8 flex-grow flex flex-col justify-between">
-                        <div>
-                            <p class="text-gray-300 mb-4 text-base leading-relaxed">包含氣球佈置、MerryMe燈條與求婚花束。<br>讓廢墟的光影成為你們愛情的最佳見證。</p>
-                            <ul class="text-sm text-gray-500 space-y-1 mb-4">
-                                <li><i class="fas fa-check text-neon-pink mr-2"></i> 基礎包場方案內容 (含點心)</li>
-                                <li><i class="fas fa-check text-neon-pink mr-2"></i> 溫馨氣球 + 拍照背板</li>
-                                <li><i class="fas fa-check text-neon-pink mr-2"></i> MerryMe 燈條 & 求婚花束</li>
-                            </ul>
-                        </div>
-                        <div class="text-right text-neon-pink font-bold group-hover:translate-x-2 transition mt-4">查看完整內容 <i class="fas fa-arrow-right ml-1"></i></div>
+                        <p class="text-gray-300 mb-4 text-base leading-relaxed">包含氣球佈置、MerryMe燈條與求婚花束。<br>讓廢墟的光影成為你們愛情的最佳見證。</p>
+                        <div class="text-right text-neon-pink font-bold group-hover:translate-x-2 transition mt-4">查看方案 <i class="fas fa-arrow-right ml-1"></i></div>
                     </div>
                 </div>
 
-                <div onclick="handleCardClick('wedding')" class="plan-card wedding-card cursor-pointer group relative rounded-2xl overflow-hidden border-2 border-champagne/50 shadow-[0_0_30px_rgba(212,175,55,0.15)] bg-zinc-900 flex flex-col">
+                <div onclick="showSubPlanModal(['wedding_A', 'wedding_B'])" class="plan-card wedding-card cursor-pointer group relative rounded-2xl overflow-hidden border-2 border-champagne/50 shadow-[0_0_30px_rgba(212,175,55,0.15)] bg-zinc-900 flex flex-col">
                     <div class="h-80 md:h-96 overflow-hidden relative w-full">
-                        <img src="images/wedding-cover.jpg" alt="高雄輕婚禮場地" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/50 to-transparent h-32"></div>
-                        <div class="absolute bottom-6 left-8">
+                        <img src="images/wedding-cover.jpg" onerror="this.src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1000'" class="w-full h-full object-cover">
+                        <div class="absolute bottom-6 left-8 z-10">
                             <div class="text-white font-bold text-2xl mb-1 flex items-center"><i class="fas fa-ring text-champagne mr-3"></i> 婚禮派對 & 證婚</div>
-                            <p class="text-champagne text-xl font-bold">平日 $35,000 / 假日 $40,000 起</p>
                         </div>
                     </div>
                     <div class="p-8 flex-grow flex flex-col justify-between">
-                        <div>
-                            <p class="text-gray-300 mb-4 text-base leading-relaxed">提供 After Party 與 證婚儀式+派對 雙重選擇。<br>包含精緻自助點心、酒水暢飲與DJ演出。</p>
-                            <ul class="text-sm text-gray-500 space-y-1 mb-4">
-                                <li><i class="fas fa-check text-champagne mr-2"></i> Welcome / After Party</li>
-                                <li><i class="fas fa-check text-champagne mr-2"></i> 戶外證婚 + 派對</li>
-                            </ul>
-                        </div>
-                        <div class="text-right text-champagne font-bold group-hover:translate-x-2 transition mt-4">查看詳細內容 <i class="fas fa-arrow-right ml-1"></i></div>
+                        <p class="text-gray-300 mb-4 text-base leading-relaxed">提供 After Party 與 證婚儀式+派對 雙重選擇。<br>包含精緻自助點心、酒水暢飲與DJ演出。</p>
+                        <div class="text-right text-champagne font-bold group-hover:translate-x-2 transition mt-4">查看詳細 <i class="fas fa-arrow-right ml-1"></i></div>
                     </div>
                 </div>
             </div>
-
-            <div class="border-t border-zinc-800 my-10 relative"><span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-ruin-dark px-4 text-gray-500 text-sm">更多方案選擇</span></div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div onclick="handleCardClick('baby')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer">
-                    <div class="h-40 overflow-hidden"><img src="images/baby-cover.jpg" class="w-full h-full object-cover"></div>
-                    <div class="p-5">
-                        <h4 class="text-lg font-bold text-white mb-1">抓周 / 性別派對</h4>
-                        <p class="text-neon-blue font-bold mb-2">平日 $45,000 起</p>
-                        <p class="text-gray-500 text-xs">含氣球佈置、道具、精緻點心</p>
-                    </div>
+                <div onclick="handleCardClick('baby')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">抓周 / 性別派對</h4>
+                    <p class="text-gray-500 text-xs">含氣球佈置、道具、點心</p>
                 </div>
-                <div onclick="handleCardClick('party')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer">
-                    <div class="h-40 overflow-hidden"><img src="images/party-cover.jpg" class="w-full h-full object-cover"></div>
-                    <div class="p-5">
-                        <h4 class="text-lg font-bold text-white mb-1">慶生 / 各式派對</h4>
-                        <p class="text-neon-blue font-bold mb-2">平日 $28,000 起</p>
-                        <p class="text-gray-500 text-xs">含酒水、精緻點心、包場</p>
-                    </div>
+                <div onclick="handleCardClick('party')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">慶生 / 各式派對</h4>
+                    <p class="text-gray-500 text-xs">含酒水、精緻點心</p>
                 </div>
-                <div onclick="handleCardClick('rental')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer">
-                    <div class="h-40 overflow-hidden"><img src="images/venue-empty.jpg" class="w-full h-full object-cover"></div>
-                    <div class="p-5">
-                        <h4 class="text-lg font-bold text-white mb-1">純場地租借</h4>
-                        <p class="text-neon-blue font-bold mb-2">平日 $10,000 起</p>
-                        <p class="text-gray-500 text-xs">平日低消10000(3小時) / 假日15000(3小時)</p>
-                    </div>
+                <div onclick="handleCardClick('rental')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">純場地租借</h4>
+                    <p class="text-gray-500 text-xs">最自由的空間使用</p>
                 </div>
-                <div onclick="handleCardClick('meeting')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer">
-                    <div class="h-40 overflow-hidden"><img src="images/meeting-cover.jpg" class="w-full h-full object-cover"></div>
-                    <div class="p-5">
-                        <h4 class="text-lg font-bold text-white mb-1">會議包場方案</h4>
-                        <p class="text-neon-blue font-bold mb-2">平日 $12,000 起</p>
-                        <p class="text-gray-500 text-xs">含桌椅、飲品、視聽設備</p>
-                    </div>
+                <div onclick="handleCardClick('meeting')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">會議包場方案</h4>
+                    <p class="text-gray-500 text-xs">含桌椅、飲品</p>
                 </div>
-            </div>
-            
-            <div onclick="handleCardClick('custom')" class="mt-8 bg-zinc-900/50 border border-dashed border-zinc-600 rounded-xl p-4 text-center cursor-pointer hover:border-neon-pink hover:text-neon-pink transition">
-                <span class="text-sm">有特殊需求？ 點此選擇 <b>客製化方案</b> (展覽/拍攝/活動)</span>
             </div>
         </div>
     </section>
-
-    <section id="gallery" class="py-20 bg-ruin-dark"><div class="max-w-7xl mx-auto px-4"><h2 class="text-3xl font-bold text-white mb-8 text-center">精彩實錄 Gallery</h2><div class="grid grid-cols-2 md:grid-cols-4 gap-4"><div class="gallery-item"><img src="images/venue-decor-wedding.jpg" alt="高雄鹽埕區戶外證婚場地 Ruins Bar 廢墟風輕婚禮佈置與花藝設計" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div><div class="gallery-item"><img src="images/party-dj-crowd.jpg" alt="高雄私人派對包場推薦 Ruins Bar 深夜DJ活動與霓虹燈光氛圍" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div><div class="gallery-item"><img src="images/proposal-romantic-light.jpg" alt="高雄求婚餐廳場地 浪漫MarryMe燈飾與氣球驚喜企劃" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div><div class="gallery-item"><img src="images/food-buffet.jpg" alt="高雄派對外燴 Buffet 自助餐點 精緻鹹甜點心與酒水服務" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div><div class="gallery-item"><img src="images/baby-party-setup.jpg" alt="高雄寶寶抓周派對場地租借 溫馨親子活動空間與道具" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div><div class="gallery-item"><img src="images/venue-outdoor-vibe.jpg" alt="高雄老屋改建活動場地 戶外露天區域與復古燈串造景" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div><div class="gallery-item"><img src="images/gallery-vibe-1.jpg" alt="高雄特色酒吧包場 工業風廢墟裝潢與適合拍照打卡景點" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div><div class="gallery-item"><img src="images/gallery-decor-1.jpg" alt="高雄小型婚禮場地佈置 質感花藝與客製化背板設計" class="w-full h-64 object-cover rounded-lg hover:opacity-80 transition border border-zinc-800"></div></div></div></section>
-    
-    <section id="video" class="py-20 bg-zinc-900 border-t border-zinc-800"><div class="max-w-4xl mx-auto px-4 text-center"><h2 class="text-3xl font-bold text-white mb-8 flex items-center justify-center"><i class="fab fa-instagram text-neon-pink mr-3"></i> 影音專區 Video</h2><p class="text-gray-400 mb-6 text-sm">點擊觀看現場活動 Reels</p><div class="flex justify-center"><a href="https://www.instagram.com/reel/DQjucxEEreY/?igsh=MTVsd3JteWFlZTVkbw==" target="_blank" class="group relative block w-full max-w-sm rounded-2xl overflow-hidden border-2 border-zinc-700 hover:border-neon-pink transition duration-300 shadow-[0_0_30px_rgba(0,0,0,0.5)]"><img src="images/video-cover.jpg" onerror="this.src='https://images.unsplash.com/photo-1514525253440-b393452e3720?q=80&w=1000&auto=format&fit=crop'" alt="高雄鹽埕區 Ruins Bar 廢墟酒吧 派對包場活動實錄 與 DJ現場演出氛圍" class="w-full h-96 object-cover transform group-hover:scale-105 transition duration-700 opacity-80 group-hover:opacity-100"><div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition"></div><div class="absolute inset-0 flex items-center justify-center"><div class="w-16 h-16 bg-neon-pink/90 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,0,85,0.6)] group-hover:scale-110 transition duration-300"><i class="fas fa-play text-white text-2xl ml-1"></i></div></div><div class="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black to-transparent text-left"><p class="text-white font-bold text-lg"><i class="fab fa-instagram mr-2"></i> RUINS BAR 派對實錄</p><p class="text-gray-300 text-xs">觀看 Reels 短影音</p></div></a></div>
-            <div class="mt-10">
-                <a href="https://www.instagram.com/ruins_yencheng/" target="_blank" class="inline-flex items-center text-neon-pink border border-neon-pink px-6 py-3 rounded-full hover:bg-neon-pink hover:text-white transition">
-                    <i class="fab fa-instagram text-xl mr-2"></i> 前往 Instagram 看更多
-                </a>
-             </div>
-            </div>
-    </section>
-
-    <section id="reviews" class="py-20 bg-zinc-900 border-t border-zinc-800">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h2 class="text-3xl font-bold text-white mb-8">五星好評見證</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div class="bg-ruin-gray p-6 rounded-xl border border-zinc-700 text-left">
-                    <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p class="text-gray-300 text-sm mb-4">"在高雄找了很久，終於找到這麼有氛圍的抓周場地！廢墟風拍照起來意外的溫馨，主持人也很會帶氣氛，長輩們都稱讚不已。"</p>
-                    <p class="text-neon-blue text-xs font-bold">- 林小姐 (抓周派對)</p>
-                </div>
-                <div class="bg-ruin-gray p-6 rounded-xl border border-zinc-700 text-left">
-                     <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p class="text-gray-300 text-sm mb-4">"原本擔心求婚會很尷尬，但團隊佈置的燈光真的很美！方案包含的平面攝影也很專業，完美捕捉了女友感動的瞬間，大推！"</p>
-                    <p class="text-neon-pink text-xs font-bold">- 張先生 (求婚方案)</p>
-                </div>
-                <div class="bg-ruin-gray p-6 rounded-xl border border-zinc-700 text-left">
-                     <div class="flex text-yellow-400 mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p class="text-gray-300 text-sm mb-4">"這次公司舉辦的會議講座選在這裡，大家都很喜歡這裡的輕鬆氛圍。包場的隱私性很好，投影設備和音響都很棒。會後直接轉成餐酒會！"</p>
-                    <p class="text-white text-xs font-bold">- 創意設計公司</p>
-                </div>
-            </div>
-            <div>
-                <a href="https://www.google.com/search?sca_esv=cb427c73f925e7d3&rlz=1C5CHFA_enTW1093TW1093&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-EzjU63sUD-tLvHl4BxZAN-0S-dqYVPODkv19MMIjBNCxNowPZGTBK8bAINMFp2hI6IhQlTLQrw2UB1vrERdM-kSNrV-TIR5ts-SmwjyZuQ009TARLwzeqQAkRXoi1o3AkSvvp6XZDt-v3q-VlOm6t3PY8yCIch7KgMrhulv0Iy1ms_Yehg%3D%3D&q=%E5%BB%A2%E5%A2%9FRuins%28%E5%8C%85%E5%A0%B4/%E5%A9%9A%E7%A6%AE/%E6%B4%BE%E5%B0%8D/%E6%B1%82%E5%A9%9A/%E6%85%B6%E7%94%9F/%E6%BC%94%E5%87%BA/%E6%B4%BB%E5%8B%95%EF%BC%89%E5%85%A8%E9%A0%90%E7%B4%84%E5%88%B6+%E8%A9%95%E8%AB%96&sa=X&ved=2ahUKEwim0Y-1uJKRAxX7dfUHHYx3JmsQ0bkNegQIJRAE&biw=1973&bih=1046&dpr=2" target="_blank" class="inline-flex items-center text-gray-400 hover:text-white transition text-sm border-b border-gray-600 hover:border-white pb-1">
-                    <i class="fab fa-google mr-2"></i> 前往 Google 查看全部真實評論
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-black pt-24 pb-12 border-t border-white/5 relative overflow-hidden">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-full max-w-2xl h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-        <div class="max-w-6xl mx-auto px-6 text-center">
-            <h2 class="font-display text-4xl md:text-5xl text-white font-bold tracking-[0.3em] mb-3">RUINS BAR</h2>
-            <p class="text-zinc-500 text-xs tracking-[0.5em] uppercase mb-16 opacity-70">Kaohsiung / Industrial / Space</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10 rounded-lg overflow-hidden mb-16 max-w-4xl mx-auto">
-                <a href="https://www.google.com/maps/dir//高雄市鹽埕區瀨南街205號" target="_blank" class="bg-black p-8 group hover:bg-zinc-900/50 transition duration-500 cursor-pointer"><div class="text-zinc-500 mb-3 text-xl group-hover:text-neon-blue transition duration-300 transform group-hover:scale-110"><i class="fas fa-location-arrow"></i></div><h4 class="text-zinc-600 text-[10px] uppercase tracking-widest mb-2 group-hover:text-white transition">Navigation</h4><p class="text-zinc-300 text-sm font-light tracking-wide group-hover:text-neon-blue transition">高雄市鹽埕區<br>瀨南街205號</p></a>
-                <a href="tel:0932828922" class="bg-black p-8 group hover:bg-zinc-900/50 transition duration-500"><div class="text-zinc-500 mb-3 text-xl group-hover:text-neon-pink transition duration-300 transform group-hover:scale-110"><i class="fas fa-phone"></i></div><h4 class="text-zinc-600 text-[10px] uppercase tracking-widest mb-2 group-hover:text-white transition">Reservation</h4><p class="text-white text-lg font-display tracking-widest group-hover:text-neon-pink transition">0932-828-922</p></a>
-                <a href="https://line.me/R/ti/p/@529ldsir" target="_blank" class="bg-black p-8 group hover:bg-zinc-900/50 transition duration-500"><div class="text-zinc-500 mb-3 text-xl group-hover:text-[#06c755] transition duration-300 transform group-hover:scale-110"><i class="fab fa-line"></i></div><h4 class="text-zinc-600 text-[10px] uppercase tracking-widest mb-2 group-hover:text-white transition">Official Line</h4><p class="text-white text-lg font-display tracking-widest group-hover:text-[#06c755] transition">@529ldsir</p></a>
-            </div>
-            <div class="mb-12 flex flex-wrap justify-center gap-x-6 gap-y-3">
-                <span class="text-xs text-zinc-600 hover:text-zinc-400 transition cursor-default">#高雄場地租借</span>
-                <span class="text-xs text-zinc-600 hover:text-zinc-400 transition cursor-default">#鹽埕區酒吧</span>
-                <span class="text-xs text-zinc-600 hover:text-zinc-400 transition cursor-default">#廢墟風攝影棚</span>
-                <span class="text-xs text-zinc-600 hover:text-zinc-400 transition cursor-default">#求婚場地</span>
-                <span class="text-xs text-zinc-600 hover:text-zinc-400 transition cursor-default">#抓周派對</span>
-                <span class="text-xs text-zinc-600 hover:text-zinc-400 transition cursor-default">#小型婚禮</span>
-            </div>
-            <div class="text-zinc-700 text-[10px] font-display tracking-widest border-t border-white/5 pt-8 inline-block px-10">2025 RUINS BAR. DESIGNED IN KAOHSIUNG.</div>
-        </div>
-    </footer>
 
     <div id="subPlanModal" class="hidden fixed inset-0 z-[70] overflow-y-auto" role="dialog">
         <div class="fixed inset-0 bg-black/90 transition-opacity backdrop-blur-sm" onclick="closeSubModal()"></div>
@@ -264,7 +174,7 @@
                 <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white z-10 p-2"><i class="fas fa-times text-2xl"></i></button>
 
                 <div class="max-h-[85vh] overflow-y-auto p-6 scrollbar-hide">
-                    <h3 class="text-center text-white font-bold mb-2 text-2xl flex justify-center items-center"><i class="fas fa-calendar-alt text-neon-blue mr-3"></i> 檔期查詢</h3>
+                    <h3 class="text-center text-white font-bold mb-2 text-2xl flex justify-center items-center"><i class="fas fa-calendar-alt text-neon-blue mr-3"></i> 預約試算</h3>
                     <div class="bg-zinc-800 p-3 rounded-lg mb-6 text-center border border-zinc-700">
                         <span class="text-gray-400 text-xs block">您目前選擇的方案</span>
                         <span id="selectedPlanDisplay" class="text-neon-pink font-bold text-lg"></span>
@@ -272,12 +182,11 @@
 
                     <div id="step1">
                         <form id="checkForm" onsubmit="handleCheck(event)" class="space-y-4">
-                            <div><label class="block text-neon-blue text-sm font-bold mb-1">1. 選擇預計日期</label><p id="dateBlockTip" class="text-xs text-blue-400 mb-2"></p><div class="relative"><input type="date" id="dateInput" 
-       onchange="checkLogic()" 
-       onclick="this.showPicker()" 
-       oninput="if(this.value && this.value < this.min) { alert('⚠️ 此日期無法預約 (需符合籌備期)'); this.value=''; }"
-       required 
-       class="w-full bg-black border border-zinc-700 text-white rounded-lg p-3 focus:border-neon-blue focus:outline-none cursor-pointer"></div><p id="dayTypeLabel" class="text-xs text-gray-500 mt-1 text-right"></p><p id="dateWarning" class="text-neon-pink text-xs mt-1 hidden font-bold"></p></div>
+                            <div>
+                                <label class="block text-neon-blue text-sm font-bold mb-1">1. 選擇預計日期</label>
+                                <div class="relative"><input type="date" id="dateInput" onchange="checkLogic()" onclick="this.showPicker()" required class="w-full bg-black border border-zinc-700 text-white rounded-lg p-3 focus:border-neon-blue focus:outline-none cursor-pointer"></div>
+                                <p id="dayTypeLabel" class="text-xs text-gray-500 mt-1 text-right"></p>
+                            </div>
                             <div>
                                 <label class="block text-neon-blue text-sm font-bold mb-1">2. 選擇時段</label>
                                 <div class="grid grid-cols-3 gap-2 mb-4" id="standardSlots">
@@ -289,51 +198,43 @@
                                     <p class="text-xs text-gray-400 mb-2">或 自訂開始時間 (結束自動計算)</p>
                                     <div class="grid grid-cols-2 gap-4">
                                         <div><label class="text-white text-xs">開始</label><select id="startTime" onchange="customTimeTrigger()" class="w-full bg-black border-zinc-600 text-white rounded p-1"></select></div>
-                                        <div><label class="text-white text-xs">結束</label><input type="text" id="endTimeDisplay" readonly class="w-full bg-[#1a1a1a] border border-zinc-600 text-gray-400 rounded p-1 text-center cursor-not-allowed" value="自動計算"><input type="hidden" id="endTime"></div>
+                                        <div><label class="text-white text-xs">結束</label><input type="text" id="endTimeDisplay" readonly class="w-full bg-[#1a1a1a] border border-zinc-600 text-gray-400 rounded p-1 text-center" value="自動計算"><input type="hidden" id="endTime"></div>
                                     </div>
-                                    <p id="durationWarning" class="text-neon-pink text-xs mt-2 hidden font-bold"></p>
                                 </div>
                             </div>
-                            <button id="submitBtn" type="submit" class="w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] transition shadow-lg mt-4 active:scale-95 cursor-pointer">查詢空檔 <i class="fas fa-search ml-2"></i></button>
+                            <button id="submitBtn" type="submit" class="w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] transition shadow-lg mt-4 cursor-pointer active:scale-95">確認檔期並報價 <i class="fas fa-search ml-2"></i></button>
                         </form>
                     </div>
 
-                    <div id="recommendationArea" class="hidden mt-6 bg-zinc-800 p-4 rounded-lg border border-red-500/50 animate-fade-in-down"><h4 class="text-red-400 font-bold mb-2"><i class="fas fa-times-circle"></i> 該時段已預約</h4><div id="recList" class="space-y-2"></div><button onclick="resetRec()" class="text-gray-500 text-xs mt-3 underline w-full text-center">重新選擇日期</button></div>
-
                     <div id="step2" class="hidden mt-6 border-t border-zinc-700 pt-6 animate-fade-in-down">
                         <div class="bg-zinc-800/80 p-4 rounded-xl border-l-4 border-green-500 mb-4">
-                            <h4 class="text-green-400 font-bold text-lg mb-1"><i class="fas fa-check-circle"></i> 此時段尚有空位！</h4>
-                            <p class="text-white">日期：<span id="displayDate" class="font-bold text-neon-pink"></span></p>
-                            <p class="text-gray-300">時段：<span id="displayTime" class="font-bold"></span></p>
+                            <h4 class="text-green-400 font-bold text-lg mb-1"><i class="fas fa-check-circle"></i> 方案基礎費用：$<span id="basePriceDisplay"></span></h4>
                             <div class="mt-3 border-t border-zinc-600 pt-3">
-                                <p class="text-xs text-gray-400 mb-1">此方案包含內容：</p>
-                                <ul id="step2Features" class="text-sm text-gray-300 list-disc list-inside space-y-1"></ul>
+                                <p class="text-xs text-gray-400 mb-1">✅ 方案內含 (自動選取/折抵)：</p>
+                                <ul id="includedFeatures" class="text-sm text-gray-300 list-disc list-inside space-y-1"></ul>
                             </div>
                         </div>
-                        <div class="text-center"><button onclick="expandAddons()" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition shadow">下一步：選擇加購服務 <i class="fas fa-chevron-down ml-2"></i></button></div>
+                        
+                        <h3 class="text-white font-bold mb-4 flex items-center text-lg mt-6"><span class="bg-neon-pink text-white text-xs px-2 py-1 rounded mr-3">加購</span> 專屬服務選單</h3>
+                        <div class="grid grid-cols-1 gap-3 mb-6" id="addonList"></div>
+                        
+                        <button onclick="expandFinal()" class="w-full bg-neon-pink text-white font-bold py-3 rounded-lg hover:bg-pink-600 transition shadow-[0_0_15px_rgba(255,0,85,0.4)]">計算總價 <i class="fas fa-calculator ml-2"></i></button>
                     </div>
 
                     <div id="step3" class="hidden mt-6 border-t border-zinc-700 pt-6 animate-fade-in-down">
-                        <h3 class="text-white font-bold mb-4 flex items-center text-lg"><span class="bg-neon-pink text-white text-xs px-2 py-1 rounded mr-3">加購</span> 專屬服務選單</h3>
-                        <div class="grid grid-cols-1 gap-3 mb-6" id="addonList"></div>
-                        <button onclick="expandFinal()" class="w-full bg-neon-pink text-white font-bold py-3 rounded-lg hover:bg-pink-600 transition shadow-[0_0_15px_rgba(255,0,85,0.4)]">查看預估總價 <i class="fas fa-calculator ml-2"></i></button>
-                    </div>
-
-                    <div id="step4" class="hidden mt-6 border-t border-zinc-700 pt-6 animate-fade-in-down">
                         <div class="bg-white text-black p-5 rounded-xl shadow-2xl relative overflow-hidden">
                             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-neon-blue to-neon-pink"></div>
-                            <h4 class="font-bold text-xl mb-4 border-b border-gray-200 pb-2 text-center">RUINS BAR 預約試算</h4>
+                            <h4 class="font-bold text-xl mb-4 border-b border-gray-200 pb-2 text-center">預約試算結果</h4>
                             
                             <div class="space-y-3 text-sm mb-4">
                                 <div class="flex justify-between items-center"><span class="text-gray-600 font-bold">預約方案</span><span id="invPlanName" class="font-bold text-right"></span></div>
                                 <div class="flex justify-between items-center text-gray-500 text-xs"><span></span><span id="invPlanPrice"></span></div>
                                 <div class="flex justify-between items-center border-t border-gray-200 pt-2"><span class="text-gray-600 font-bold">預約日期</span><span id="invDate" class="font-bold text-right text-xs"></span></div>
                                 <div class="flex justify-between items-center text-gray-500 text-xs"><span>時段</span><span id="invTimeRange"></span></div>
-                                <div class="flex justify-between items-center text-gray-500 text-xs"><span>總時數</span><span id="invTotalHours"></span></div>
                             </div>
                             
                             <div class="bg-gray-100 p-3 rounded-lg mb-4">
-                                <p class="text-xs text-gray-500 mb-2 font-bold uppercase">加購項目</p>
+                                <p class="text-xs text-gray-500 mb-2 font-bold uppercase">加購/升級項目</p>
                                 <ul id="invAddons" class="text-sm space-y-2"></ul>
                             </div>
 
@@ -344,15 +245,13 @@
 
                             <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-4">
                                 <h5 class="font-bold text-gray-700 mb-3 flex items-center"><i class="fas fa-user-edit mr-2"></i> 預約人資料</h5>
-                                
                                 <div class="mb-3">
-                                    <label class="block text-gray-500 text-xs font-bold mb-1">您的姓名 / 稱呼</label>
-                                    <input type="text" id="guestName" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm focus:outline-none focus:border-neon-pink text-black" placeholder="例如：陳先生 / 小美">
+                                    <label class="block text-gray-500 text-xs font-bold mb-1">您的姓名</label>
+                                    <input type="text" id="guestName" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="例：陳先生">
                                 </div>
-
                                 <div>
-                                    <label class="block text-gray-500 text-xs font-bold mb-1">聯絡電話 (台灣手機)</label>
-                                    <input type="tel" id="guestPhone" maxlength="10" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm focus:outline-none focus:border-neon-pink text-black" placeholder="09xxxxxxxx">
+                                    <label class="block text-gray-500 text-xs font-bold mb-1">聯絡電話</label>
+                                    <input type="tel" id="guestPhone" maxlength="10" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="09xxxxxxxx">
                                 </div>
                             </div>
                         </div>
@@ -366,196 +265,159 @@
             </div>
         </div>
     </div>
-
+    
     <div id="copySuccessModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md">
-        <div class="bg-zinc-800 border-2 border-[#06c755] p-8 rounded-2xl shadow-[0_0_50px_rgba(6,199,85,0.3)] text-center max-w-sm mx-4 transform scale-100 transition-all">
+        <div class="bg-zinc-800 border-2 border-[#06c755] p-8 rounded-2xl shadow-[0_0_50px_rgba(6,199,85,0.3)] text-center max-w-sm mx-4">
             <div class="w-20 h-20 bg-[#06c755] rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-check text-4xl text-white"></i></div>
             <h3 class="text-2xl font-bold text-white mb-2">預約資料已複製！</h3>
-            <p class="text-gray-300 mb-8 text-sm">請點擊下方按鈕開啟 LINE，並在對話框中 <span class="text-[#06c755] font-bold">貼上</span> 剛剛複製的文字即可。</p>
+            <p class="text-gray-300 mb-8 text-sm">請點擊下方按鈕開啟 LINE，並在對話框中 <span class="text-[#06c755] font-bold">貼上</span> 剛剛複製的文字。</p>
             <button onclick="goToLine()" class="w-full bg-[#06c755] hover:bg-[#05b54d] text-white font-bold py-4 rounded-xl text-lg transition shadow-lg">前往 LINE 貼上 <i class="fas fa-external-link-alt ml-2"></i></button>
             <button onclick="closeCopyModal()" class="mt-4 text-gray-500 text-sm underline">關閉視窗</button>
         </div>
     </div>
 
-    <a href="javascript:void(0)" onclick="directLine()" class="sticky-btn" aria-label="Line洽詢"><i class="fa-brands fa-line"></i></a>
+    <a href="javascript:void(0)" onclick="goToLine()" class="sticky-btn" aria-label="Line洽詢"><i class="fa-brands fa-line"></i></a>
 
     <script>
+        // ★★★ 您的 GAS 後端網址 ★★★
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzk5VWXvgDJLoLW_eTYuXIxh_ziCrD9mbRsvtrK-Aulasx4eMt6QT9mzuq3HeQ8UGspxw/exec";
+        
         const LINE_ID = "@529ldsir"; 
         const LINE_DEEP_LINK = "line://ti/p/" + LINE_ID;
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyiyxa6_OwdrWp_YQVkJ622DQgN23jHWTdCdt-lj0LBQ1Lm_pV2RWkvFQMigMpcg59NHQ/exec";
 
-        // 基礎方案內容定義
-        const PACKAGE_BASE_FEATURES = [
-            '室內場地使用3小時(含進退場時間)',
-            '室內竹編椅 30張',
-            '現場投影 燈光 音響 空調設備使用',
-            '精緻自助式點心25人份(共10樣鹹甜點心搭配 非每樣25份)'
-        ];
-
-        const RENTAL_BASE_FEATURES = [
-            '室內場地使用3小時(含進退場時間)',
-            '室內竹編椅 30張',
-            '現場投影 燈光 音響 空調設備使用'
-        ];
-
-        // ★ V38: 修正加購項目 (計數器設定)
-        const addOnOptions = [
-            // --- 計數型 (Counters) ---
-            { id: 'time_plus', name: '場地加時 (1hr)', price: 3000, type: 'counter', max: 12, minOrder: 0 }, 
-            { id: 'table_6', name: '6人折疊桌 (張)', price: 150, type: 'counter', max: 6, minOrder: 0 },
-            { id: 'chair_bamboo', name: '加租竹節椅 (張)', price: 30, type: 'counter', max: 20, minOrder: 0 }, // Rename
-            { id: 'box_meal', name: '西點餐盒 (盒)', price: 200, type: 'counter', max: 200, minOrder: 20 }, // Min 20
-            
-            // --- 開關型 (Toggles) ---
-            { id: 'drink_na', name: '5L 自助無酒精飲品 (桶)', price: 800, type: 'toggle' },
-            { id: 'drink_cocktail', name: '5L 自助雞尾酒調酒 (桶)', price: 2000, type: 'toggle' },
-            { id: 'snack_basic', name: '自助式點心盤 (25人份)', price: 1500, type: 'toggle' },
-            { id: 'snack_deluxe', name: '精緻自助點心 (25人份)', price: 15000, type: 'toggle' },
-            { id: 'meal_deluxe', name: '精緻自助正餐 (25人份)', price: 25000, type: 'toggle' },
-            { id: 'decor_table', name: '取餐區餐桌佈置', price: 5000, type: 'toggle' },
-            { id: 'singer', name: '升級駐唱歌手 (2HR)', price: 1000, type: 'toggle' },
-            { id: 'beer_cart', name: '啤酒推車 (48罐)', price: 3000, type: 'toggle' },
-            { id: 'bartender_100', name: '駐場調酒 100杯 (2hr)', price: 35000, type: 'toggle' },
-            { id: 'bartender_150', name: '駐場調酒 150杯 (2hr)', price: 40000, type: 'toggle' },
-            { id: 'bartender_all', name: '駐場調酒 暢飲 (2.5hr)', price: 68000, type: 'toggle' },
-            { id: 'upgrade_meal', name: '點心升級正餐 (補差價)', price: 10000, type: 'toggle' },
-            { id: 'backdrop_name', name: '客製化姓名背板', price: 3000, type: 'toggle' },
-            { id: 'host', name: '儀式主持人', price: 6000, type: 'toggle' },
-            { id: 'lights_name', name: '新人專屬英文名燈條', price: 4000, type: 'toggle' },
-            { id: 'backdrop_flower', name: '升級鮮花主題背板', price: 15000, type: 'toggle' },
-            { id: 'wedding_flower', name: '證婚區升級鮮花佈置', price: 30000, type: 'toggle' }
-        ];
-
-        const bartenderGroup = ['bartender_100', 'bartender_150', 'bartender_all'];
-
-        // ★ V38: 方案定義 (加入會議餐盒)
-        const plansData = {
-            'rental': { 
-                hasVariants: false, key: 'rental', name: '純場地租借', priceWeekday: 10000, priceWeekend: 15000, type: 'rental', 
-                includes: [], 
-                features: RENTAL_BASE_FEATURES, 
-                allowedAddons: ['time_plus', 'table_6', 'chair_bamboo', 'drink_na', 'drink_cocktail'] 
-            },
-            'meeting': { 
-                hasVariants: false, key: 'meeting', name: '會議包場方案', priceWeekday: 12000, priceWeekend: 17000, type: 'pkg', 
-                includes: ['drink_na'], 
-                features: [...RENTAL_BASE_FEATURES, '6人折疊桌 * 5張', '2 桶 5L 無酒精飲品'], 
-                allowedAddons: ['time_plus', 'box_meal', 'snack_basic', 'snack_deluxe', 'meal_deluxe'] 
-            },
-            'party': { hasVariants: false, key: 'party', name: '慶生 / 各式派對', priceWeekday: 28000, priceWeekend: 33000, type: 'pkg', includes: ['drink_na', 'drink_cocktail', 'snack_deluxe'], features: [...PACKAGE_BASE_FEATURES, '無酒精 5L*2 + 雞尾酒 5L*1'], allowedAddons: ['time_plus', 'decor_table', 'singer', 'beer_cart', 'bartender_100', 'bartender_150', 'bartender_all', 'upgrade_meal'] },
-            'baby': { hasVariants: false, key: 'baby', name: '抓周 / 性別派對', priceWeekday: 45000, priceWeekend: 50000, type: 'pkg', includes: ['snack_deluxe'], features: [...PACKAGE_BASE_FEATURES, '溫馨氣球 + 拍照背板', '抓周道具 / 性別氣球'], allowedAddons: ['time_plus', 'backdrop_name', 'decor_table', 'host', 'upgrade_meal'] },
-            'proposal': { hasVariants: false, key: 'proposal', name: '求婚包場', priceWeekday: 48000, priceWeekend: 52000, type: 'pkg', includes: [], features: [...PACKAGE_BASE_FEATURES, '溫馨氣球 + 拍照背板', 'MerryME 燈條佈置', '求婚花束 (乾燥/鮮花)'], allowedAddons: ['time_plus', 'lights_name', 'decor_table', 'backdrop_flower', 'upgrade_meal'] },
-            'wedding': { hasVariants: true, key: 'wedding', variants: [ 
-                { name: 'Welcome / After Party', priceWeekday: 35000, priceWeekend: 40000, includes: ['snack_deluxe', 'drink_na', 'drink_cocktail'], features: [...PACKAGE_BASE_FEATURES, '油桶桌 * 4', 'DJ 現場演出 (2HR)', '無酒精 5L*1 + 雞尾酒 5L*1'], allowedAddons: ['time_plus', 'decor_table', 'singer', 'beer_cart', 'bartender_100', 'bartender_150', 'bartender_all', 'upgrade_meal'] }, 
-                { name: '戶外證婚 + 派對', priceWeekday: 108000, priceWeekend: 128000, includes: ['snack_deluxe', 'drink_na', 'drink_cocktail'], features: [...PACKAGE_BASE_FEATURES, '戶外證婚區 + 拱門 + 走道', '證婚區吐司椅', '戶外燈串 + 室內DJ (2HR)', '5L 無酒精飲品*1 + 雞尾酒*1'], allowedAddons: ['time_plus', 'decor_table', 'wedding_flower', 'singer', 'beer_cart', 'bartender_100', 'bartender_150', 'bartender_all', 'upgrade_meal'] } 
-            ] },
-            'custom': { hasVariants: false, name: '客製化方案', priceWeekday: 0, priceWeekend: 0, type: 'custom', includes: [], features: ['依需求報價'], allowedAddons: [] }
-        };
-
+        // 全域資料庫 (稍後從 GAS 填充)
+        let PLANS_DB = {};
+        let ADDONS_DB = [];
+        let CONFIG_DB = {};
+        
+        let currentPlan = null;
         let selectedAddons = new Set();
         let addonQuantities = {};
         let bookingData = {};
-        let currentPlan = { name: '', price: 0, type: '', includes: [], allowedAddons: [], features: [] };
         let isWeekend = false;
-        let extraHoursCount = 0; 
         let currentSlotMode = '';
 
+        // 系統初始化
         window.onload = function() {
-            setDatePickerMin(); 
+            fetchData();
             initCustomTimeSelects();
         };
 
-        // ... handleCardClick, closeModal, setDatePickerMin, selectSlot, customTimeTrigger, initCustomTimeSelects, updateEndTime 保持不變 ...
-        
-        function handleCardClick(planKey) {
-            const plan = plansData[planKey];
-            if (plan.hasVariants) {
-                const container = document.getElementById('subPlanContainer');
-                container.innerHTML = '';
-                plan.variants.forEach(v => {
+        // 1. 從您的 Google Sheet 抓取資料
+        function fetchData() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            fetch(GAS_URL)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        PLANS_DB = data.plans;
+                        ADDONS_DB = data.addons;
+                        CONFIG_DB = data.config;
+                        console.log("Database Loaded Successfully");
+                        document.getElementById('loadingOverlay').classList.add('hidden');
+                    } else {
+                        alert("資料讀取失敗，請重新整理網頁");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("無法連線至資料庫，請檢查網路連線");
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                });
+        }
+
+        // 2. 顯示子方案 (婚禮選單)
+        function showSubPlanModal(planIds) {
+            const container = document.getElementById('subPlanContainer');
+            container.innerHTML = '';
+            
+            let hasValidPlan = false;
+            planIds.forEach(id => {
+                const plan = PLANS_DB[id];
+                if(plan) {
+                    hasValidPlan = true;
                     const btn = document.createElement('div');
                     btn.className = "w-full bg-zinc-800 border border-zinc-600 text-white p-5 rounded-lg cursor-pointer hover:bg-zinc-700 hover:border-neon-pink transition group shadow-lg";
-                    let featuresHtml = v.features.map(f => `<li class="flex items-start"><i class="fas fa-check text-neon-blue mt-1 mr-2 text-xs"></i><span class="text-sm text-gray-300">${f}</span></li>`).join('');
-                    btn.innerHTML = `<div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-600"><span class="font-bold text-xl group-hover:text-neon-pink transition">${v.name}</span></div><ul class="space-y-1">${featuresHtml}</ul>`;
-                    btn.onclick = () => confirmPlan(v, 'pkg', planKey);
+                    
+                    let featuresHtml = '';
+                    if(plan.features && plan.features.length > 0) {
+                        featuresHtml = plan.features.map(f => `<li class="flex items-start"><i class="fas fa-check text-neon-blue mt-1 mr-2 text-xs"></i><span class="text-sm text-gray-300">${f}</span></li>`).join('');
+                    }
+
+                    btn.innerHTML = `
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-600">
+                            <span class="font-bold text-xl group-hover:text-neon-pink transition">${plan.name}</span>
+                        </div>
+                        <ul class="space-y-1">${featuresHtml}</ul>
+                    `;
+                    btn.onclick = () => confirmPlan(plan.id);
                     container.appendChild(btn);
-                });
+                }
+            });
+
+            if(hasValidPlan) {
                 document.getElementById('subPlanModal').classList.remove('hidden');
             } else {
-                confirmPlan(plan, plan.type, planKey);
+                alert("目前無法讀取此方案詳情，請稍後再試");
             }
         }
 
-        function confirmPlan(planObj, type, key) {
-            currentPlan = { 
-                key: key || planObj.key,
-                name: planObj.name, 
-                priceWeekday: planObj.priceWeekday,
-                priceWeekend: planObj.priceWeekend,
-                type: type, 
-                includes: planObj.includes || [],
-                allowedAddons: planObj.allowedAddons || [],
-                features: planObj.features || [] 
-            };
-            document.getElementById('selectedPlanDisplay').innerText = planObj.name;
+        // 3. 點擊一般卡片
+        function handleCardClick(planId) {
+            if(PLANS_DB[planId]) {
+                confirmPlan(planId);
+            } else {
+                console.warn("Plan not found:", planId);
+            }
+        }
+
+        // 4. 確認方案 -> 開啟預約視窗
+        function confirmPlan(planId) {
+            currentPlan = PLANS_DB[planId];
+            
+            document.getElementById('selectedPlanDisplay').innerText = currentPlan.name;
             document.getElementById('subPlanModal').classList.add('hidden');
-            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('bookingModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // 禁止背景捲動
+
+            // 重置 UI
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('step3').classList.add('hidden');
-            document.getElementById('step4').classList.add('hidden');
-            document.getElementById('recommendationArea').classList.add('hidden');
-            document.getElementById('bookingModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+            document.getElementById('dateInput').value = "";
+            document.getElementById('basePriceDisplay').innerText = "";
+            document.getElementById('dayTypeLabel').innerText = "";
             
             selectedAddons.clear();
-            addonQuantities = {}; // Clear counters
-            extraHoursCount = 0;
+            addonQuantities = {};
             currentSlotMode = '';
             document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('startTime').value = "";
-            document.getElementById('endTimeDisplay').value = "自動計算";
-            document.getElementById('dateInput').value = "";
 
-            // ★ V38 FIX: 純場租 OR 會議包場 -> 顯示全日按鈕
-            if (currentPlan.type === 'rental' || currentPlan.key === 'meeting') {
+            // 判斷是否顯示「全日」按鈕 (僅純租借與會議)
+            if (currentPlan.id === 'rental' || currentPlan.id === 'meeting') {
                 document.getElementById('btnAllDay').classList.remove('hidden');
             } else {
                 document.getElementById('btnAllDay').classList.add('hidden');
             }
-            setDatePickerMin();
+            
+            // 設定日期限制 (前置期)
+            const today = new Date();
+            const leadDays = (currentPlan.id === 'rental' || currentPlan.id === 'meeting') ? 2 : 14;
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() + leadDays);
+            document.getElementById("dateInput").min = minDate.toISOString().split('T')[0];
         }
-        
+
         function closeModal() { document.getElementById('bookingModal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
         function closeSubModal() { document.getElementById('subPlanModal').classList.add('hidden'); }
 
-        function setDatePickerMin() {
-            const today = new Date();
-            const leadDays = (currentPlan.type === 'rental' || currentPlan.key === 'meeting') ? 2 : 14; 
-            const minDate = new Date(today);
-            minDate.setDate(today.getDate() + leadDays);
-            const yyyy = minDate.getFullYear();
-            const mm = String(minDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(minDate.getDate()).padStart(2, '0');
-            document.getElementById("dateInput").min = `${yyyy}-${mm}-${dd}`;
-            const tipEl = document.getElementById("dateBlockTip");
-            if(currentPlan.type === 'rental' || currentPlan.key === 'meeting') {
-                tipEl.innerText = `ℹ️ 此方案需提前 2 天預約 (${yyyy}-${mm}-${dd} 起)`;
-                tipEl.className = "text-xs text-blue-400 mb-2";
-            } else {
-                tipEl.innerText = `ℹ️ 包套方案需提前 14 天預約 (${yyyy}-${mm}-${dd} 起)`;
-                tipEl.className = "text-xs text-neon-pink mb-2";
-            }
-            return `${yyyy}-${mm}-${dd}`;
-        }
-
+        // 5. 時段與日期邏輯
         function selectSlot(mode) {
             currentSlotMode = mode;
             document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
             if(mode === 'lunch') document.getElementById('btnLunch').classList.add('active');
             if(mode === 'dinner') document.getElementById('btnDinner').classList.add('active');
             if(mode === 'allday') document.getElementById('btnAllDay').classList.add('active');
-            document.getElementById('startTime').value = "";
-            document.getElementById('endTimeDisplay').value = "自動計算";
             checkLogic();
         }
 
@@ -565,479 +427,323 @@
             updateEndTime();
         }
 
-        function initCustomTimeSelects() {
-            const s = document.getElementById('startTime');
-            for (let i = 16; i <= 47; i++) {
-                const hour = Math.floor(i / 2);
-                const min = (i % 2) === 0 ? '00' : '30';
-                const hStr = hour < 10 ? '0'+hour : hour;
-                const time = `${hStr}:${min}`;
-                s.add(new Option(time, time));
-            }
-        }
-
-        function updateEndTime() {
-            const startVal = document.getElementById('startTime').value;
-            const endInput = document.getElementById('endTime');
-            const endDisplay = document.getElementById('endTimeDisplay');
-            if (!startVal) return;
-
-            let durationHours = 3; 
-            if (currentPlan.type === 'rental' && isWeekend) durationHours = 2; 
-
-            const [sh, sm] = startVal.split(':').map(Number);
-            let totalMin = sh * 60 + sm + (durationHours * 60);
-            let eh = Math.floor(totalMin / 60);
-            let em = totalMin % 60;
-            let suffix = "";
-            if (eh >= 24) { eh -= 24; suffix = " (+1)"; }
-            const ehStr = eh < 10 ? '0'+eh : eh;
-            const emStr = em === 0 ? '00' : em;
-            const finalTime = `${ehStr}:${emStr}`;
-            endInput.value = finalTime; 
-            endDisplay.value = `${finalTime}${suffix} (計${durationHours}hr)`;
-            checkLogic(); 
-        }
-
-        function isPeakTime(dateStr, slotMode, customStartStr) {
-            if (!dateStr) return false;
-            const d = new Date(dateStr);
-            const day = d.getDay(); 
-            if (day === 6 || day === 0) return true;
-            if (day === 5) {
-                if (slotMode === 'dinner') return true;
-                if (slotMode === 'custom' && customStartStr) {
-                    const hour = parseInt(customStartStr.split(':')[0], 10);
-                    if (hour >= 16) return true;
-                }
-                return false; 
-            }
-            return false;
-        }
-
-        // ★ V38: checkLogic (含會議全日價格)
         function checkLogic() {
             const dateVal = document.getElementById('dateInput').value;
-            const dayTypeLabel = document.getElementById('dayTypeLabel');
-            const dateWarning = document.getElementById('dateWarning');
-            const startTimeVal = document.getElementById('startTime').value;
-
-            // 1. 判斷平假日
-            isWeekend = isPeakTime(dateVal, currentSlotMode, startTimeVal);
-
-            if(dateVal) {
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                const checkDate = new Date(dateVal);
-                
-                const diffTime = checkDate - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                const leadDays = (currentPlan.type === 'rental' || currentPlan.key === 'meeting') ? 2 : 14;
-
-                // 檢查日期前置期 (只顯示紅字，不鎖按鈕)
-                if (diffDays < leadDays) {
-                    dateWarning.innerHTML = `⛔ 此方案需提前 ${leadDays} 天預約 <br>急需請電洽：<a href="tel:0932828922" class="underline">0932-828922</a>`;
-                    dateWarning.classList.remove('hidden');
-                } else {
-                    dateWarning.classList.add('hidden');
-                }
-
-                // 更新價格顯示
-                let currentPrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
-                
-                if (currentSlotMode === 'allday') {
-                    if (currentPlan.type === 'rental') currentPrice = isWeekend ? 36000 : 20000;
-                    else if (currentPlan.key === 'meeting') currentPrice = isWeekend ? 40000 : 28000;
-                }
-
-                const dayText = isWeekend ? "假日(或週五晚)" : "平日";
-                dayTypeLabel.innerText = (currentPrice === 0) ? "依專人報價" : `${dayText}計價，方案基本費：$${currentPrice.toLocaleString()}`;
-                
-                if (currentSlotMode === 'custom') updateEndTime();
-            }
-
-            // UI 顯示控制
-            const customContainer = document.getElementById('customTimeContainer');
-            if (currentSlotMode === 'custom') {
-                customContainer.classList.remove('hidden');
-            } else {
-                customContainer.classList.add('hidden');
-            }
+            if(!dateVal) return;
             
-            // ★ 這裡移除了所有 submitBtn.disabled = ... 的程式碼
-        }
-
-        // ★ V38: renderAddons (修復所有計數器按鈕)
-        function renderAddons() {
-            const listContainer = document.getElementById('addonList');
-            listContainer.innerHTML = '';
-
-            addOnOptions.forEach(opt => {
-                if (!currentPlan.allowedAddons.includes(opt.id)) return;
-
-                const btn = document.createElement('div');
-                const isIncluded = currentPlan.includes && currentPlan.includes.includes(opt.id);
-
-                let displayPrice = opt.price;
-                if (opt.id === 'time_plus') displayPrice = isWeekend ? 5000 : 3000;
-
-                if (isIncluded) {
-                    btn.className = 'addon-btn included bg-black border border-green-500 rounded-lg p-3 flex justify-between items-center select-none';
-                    btn.innerHTML = `<div class="flex items-center"><div class="check-icon w-5 h-5 rounded-full border border-green-500 mr-2 flex items-center justify-center opacity-100 bg-green-500 text-black"><i class="fas fa-check text-[10px]"></i></div><span class="text-sm font-bold text-green-400">${opt.name}</span></div><span class="text-green-400 text-sm font-bold">✅ 方案內含</span>`;
-                    btn.onclick = () => { alert("此方案已包含，若需增加數量請直接聯繫客服。"); };
-                    listContainer.appendChild(btn);
-                
-                // ★ 計數器按鈕 (包含 桌子、椅子、餐盒、加時)
-                } else if (opt.type === 'counter') {
-                    const currentCount = addonQuantities[opt.id] || 0;
-                    const activeClass = currentCount > 0 ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600';
-                    const priceColor = currentCount > 0 ? 'text-neon-blue' : 'text-neon-pink';
-                    // 單位處理
-                    let unit = '';
-                    if(opt.id.includes('table') || opt.id.includes('chair')) unit = '張';
-                    if(opt.id.includes('box')) unit = '盒';
-                    if(opt.id.includes('time')) unit = 'hr';
-
-                    btn.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center transition select-none`;
-                    btn.innerHTML = `
-                        <div class="flex items-center"><span class="text-sm font-bold text-white">${opt.name}</span></div>
-                        <div class="flex items-center">
-                            <span class="${priceColor} text-xs font-bold mr-3">+$${displayPrice.toLocaleString()}</span>
-                            <div class="flex items-center gap-2">
-                                <div class="counter-btn" onclick="updateCounter('${opt.id}', -1, ${opt.minOrder||0}, ${opt.max||999})"><i class="fas fa-minus text-white text-xs"></i></div>
-                                <span id="count_${opt.id}" class="text-white font-bold w-6 text-center">${currentCount}</span>
-                                <div class="counter-btn" onclick="updateCounter('${opt.id}', 1, ${opt.minOrder||0}, ${opt.max||999})"><i class="fas fa-plus text-white text-xs"></i></div>
-                            </div>
-                        </div>`;
-                    listContainer.appendChild(btn);
-
-                } else {
-                    // 開關型
-                    const isSel = selectedAddons.has(opt.id);
-                    const activeClass = isSel ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600 hover:bg-zinc-800';
-                    const iconClass = isSel ? 'opacity-100 bg-neon-blue text-black border-neon-blue' : 'opacity-30 border-zinc-500';
-                    
-                    btn.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center cursor-pointer transition select-none`;
-                    btn.onclick = () => toggleAddon(btn, opt.id);
-                    btn.dataset.id = opt.id; 
-                    btn.innerHTML = `<div class="flex items-center"><div class="check-icon w-5 h-5 rounded-full border ${iconClass} mr-2 flex items-center justify-center transition-all"><i class="fas fa-check text-[10px]"></i></div><span class="text-sm font-bold text-white">${opt.name}</span></div><span class="text-neon-pink text-sm font-bold">+$${displayPrice.toLocaleString()}</span>`;
-                    listContainer.appendChild(btn);
+            const d = new Date(dateVal);
+            const day = d.getDay();
+            // 假日定義：週六(6)、週日(0)、週五(5)晚場
+            isWeekend = (day === 6 || day === 0);
+            if (day === 5) {
+                if (currentSlotMode === 'dinner') isWeekend = true;
+                const startVal = document.getElementById('startTime').value;
+                if(currentSlotMode === 'custom' && startVal) {
+                    if(parseInt(startVal.split(':')[0]) >= 16) isWeekend = true;
                 }
-            });
-        }
-
-        // ★ V38: 智慧計數器邏輯 (含低消)
-        function updateCounter(id, delta, minOrder, max) {
-            let current = addonQuantities[id] || 0;
-            let next = current + delta;
-
-            // 低消處理 (例如餐盒 20 盒起)
-            if (minOrder > 0) {
-                if (current === 0 && delta > 0) next = minOrder; // 0 -> 20
-                else if (current === minOrder && delta < 0) next = 0; // 20 -> 0
-                else if (next < minOrder && next > 0) next = minOrder; 
             }
 
-            if (next < 0) next = 0;
-            if (next > max) { alert(`已達上限 ${max}`); next = max; }
-
-            addonQuantities[id] = next;
-            
-            // 同步更新 extraHoursCount (如果是加時)
-            if (id === 'time_plus') extraHoursCount = next;
-
-            document.getElementById(`count_${id}`).innerText = next;
-            
-            const btn = document.getElementById(`count_${id}`).closest('.addon-btn');
-            if(next > 0) {
-                btn.classList.replace('border-zinc-600', 'border-neon-blue');
-                btn.classList.add('bg-zinc-800');
-            } else {
-                btn.classList.replace('border-neon-blue', 'border-zinc-600');
-                btn.classList.remove('bg-zinc-800');
-            }
+            // 預覽價格 (僅供參考)
+            document.getElementById('dayTypeLabel').innerText = `${isWeekend?"假日":"平日"}計價`;
         }
 
-        function toggleAddon(btn, id) {
-            if (bartenderGroup.includes(id) && !selectedAddons.has(id)) {
-                bartenderGroup.forEach(bId => {
-                    if (selectedAddons.has(bId)) {
-                        selectedAddons.delete(bId);
-                        const otherBtn = document.querySelector(`.addon-btn[data-id="${bId}"]`);
-                        if(otherBtn) { 
-                            otherBtn.classList.remove('border-neon-blue', 'bg-zinc-800');
-                            otherBtn.classList.add('border-zinc-600');
-                            otherBtn.querySelector('.check-icon').classList.replace('opacity-100', 'opacity-30');
-                            otherBtn.querySelector('.check-icon').classList.remove('bg-neon-blue', 'text-black');
-                        }
-                    }
-                });
-            }
-            if (selectedAddons.has(id)) { selectedAddons.delete(id); renderAddons(); } 
-            else { selectedAddons.add(id); renderAddons(); }
-        }
-
+        // 6. 點擊「確認檔期」 -> 進入 Step 2 (顯示標配與加購)
         function handleCheck(e) {
             e.preventDefault();
             const dateVal = document.getElementById('dateInput').value;
-            if(!dateVal) { alert("請選擇日期"); return; }
-            if(!currentSlotMode) { alert("請選擇一個時段"); return; }
-
-            const startTimeVal = document.getElementById('startTime').value;
-            isWeekend = isPeakTime(dateVal, currentSlotMode, startTimeVal);
-            bookingData.planPrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+            if(!dateVal || !currentSlotMode) { alert("請選擇日期與時段"); return; }
             
-            if (currentSlotMode === 'allday') {
-                if (currentPlan.type === 'rental') bookingData.planPrice = isWeekend ? 36000 : 20000;
-                else if (currentPlan.key === 'meeting') bookingData.planPrice = isWeekend ? 40000 : 28000;
-            }
-
-            let reqStart = "", reqEnd = "", timeText = "";
-            if(currentSlotMode === 'lunch') { reqStart = "11:00"; reqEnd = "14:00"; timeText = "午場 (11:00-14:00)"; }
-            else if(currentSlotMode === 'dinner') { reqStart = "17:00"; reqEnd = "20:00"; timeText = "晚場 (17:00-20:00)"; }
-            else if(currentSlotMode === 'allday') { reqStart = "09:00"; reqEnd = "21:00"; timeText = "全日包場 (09:00-21:00)"; }
-            else { 
-                reqStart = document.getElementById('startTime').value;
-                reqEnd = document.getElementById('endTime').value; 
-                if (!reqStart) { alert("請選擇開始時間"); return; }
-                timeText = `自訂 (${reqStart}-${reqEnd})`;
-            }
-
-            bookingData.date = dateVal;
-            bookingData.time = timeText;
-            bookingData.planName = currentPlan.name;
-            bookingData.baseStart = reqStart; 
-            if(currentSlotMode === 'allday') bookingData.baseDuration = 12;
-            else if(currentSlotMode === 'custom') {
-                bookingData.baseDuration = (currentPlan.type === 'rental' && isWeekend) ? 2 : 3;
-            } else {
-                bookingData.baseDuration = 3;
-            }
-
-            const btn = e.target.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 查詢中...';
-            btn.disabled = true;
+            checkLogic(); // 再次確認平假日
             
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('recommendationArea').classList.add('hidden');
+            // 計算基礎價格
+            let basePrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+            if(currentSlotMode === 'allday') {
+                // 若全日包場，價格可能不同，這裡先做簡單加乘或固定價 (依 Sheet 設定為主，此為 fallback)
+                // 假設 rental 全日有優惠價，其他方案雙倍
+                if(currentPlan.id === 'rental') basePrice = isWeekend ? 36000 : 20000; 
+                else basePrice = basePrice * 2; 
+            }
+            
+            document.getElementById('basePriceDisplay').innerText = basePrice.toLocaleString();
+            
+            // 渲染 Step 2 內容
+            renderIncludedFeatures();
+            renderAddons();
 
-            fetch(`${GAS_URL}?date=${dateVal}&start=${reqStart}&end=${reqEnd}`)
-                .then(response => response.json())
-                .then(data => {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-
-                    if (data.available) {
-                        document.getElementById('displayDate').innerText = dateVal;
-                        document.getElementById('displayTime').innerText = timeText;
-                        
-                        const featureList = document.getElementById('step2Features');
-                        featureList.innerHTML = '';
-                        currentPlan.features.forEach(f => {
-                            featureList.innerHTML += `<li class="text-gray-300"><i class="fas fa-check text-green-500 mr-2 text-xs"></i>${f}</li>`;
-                        });
-
-                        renderAddons();
-                        const step2 = document.getElementById('step2');
-                        step2.classList.remove('hidden');
-                        step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    } else {
-                        showRecommendations(data.recommendations);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                    alert("查詢連線失敗，請檢查網路或稍後再試。");
-                });
+            document.getElementById('step2').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
-        function showRecommendations(recs) {
-            const today = new Date();
-            const leadDays = (currentPlan.type === 'rental' || currentPlan.key === 'meeting') ? 2 : 14;
-            const minDate = new Date(today);
-            minDate.setDate(today.getDate() + leadDays);
-            const validRecs = recs.filter(r => new Date(r.date) >= minDate);
-            const area = document.getElementById('recommendationArea');
-            const list = document.getElementById('recList');
+        function renderIncludedFeatures() {
+            const list = document.getElementById('includedFeatures');
             list.innerHTML = '';
-            if (validRecs && validRecs.length > 0) {
-                validRecs.forEach(r => {
-                    const div = document.createElement('div');
-                    div.className = 'flex justify-between items-center bg-black/40 p-3 rounded hover:bg-black/60 cursor-pointer transition border border-zinc-700 hover:border-neon-blue';
-                    div.innerHTML = `<div><span class="text-xs bg-gray-600 text-white px-2 py-0.5 rounded mr-2">${r.label}</span><span class="text-white text-sm font-bold">${r.date}</span><span class="text-neon-blue text-xs ml-1">${r.start} - ${r.end}</span></div><i class="fas fa-chevron-right text-gray-500"></i>`;
-                    div.onclick = () => {
-                        document.getElementById('dateInput').value = r.date;
-                        if(r.start === '11:00') selectSlot('lunch');
-                        else if(r.start === '17:00') selectSlot('dinner');
-                        else if(r.start === '09:00') selectSlot('allday'); 
-                        else { document.getElementById('startTime').value = r.start; customTimeTrigger(); }
-                        document.getElementById('submitBtn').click();
-                    };
-                    list.appendChild(div);
-                });
-            } else { list.innerHTML = '<p class="text-gray-500 text-sm">暫無符合預約規則的相近推薦。</p>'; }
-            area.classList.remove('hidden');
-            area.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function resetRec() {
-            document.getElementById('recommendationArea').classList.add('hidden');
-            document.getElementById('dateInput').focus();
-        }
-
-        function expandAddons() { document.getElementById('step3').classList.remove('hidden'); document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-        
-        // ★ V38: 試算 (支援計數器項目)
-        function expandFinal() {
-            document.getElementById('invPlanName').innerText = bookingData.planName;
-            document.getElementById('invPlanPrice').innerText = (bookingData.planPrice === 0) ? "依報價" : "$ " + bookingData.planPrice.toLocaleString();
             
-            const listContainer = document.getElementById('invAddons');
-            listContainer.innerHTML = '';
-            let totalAddonPrice = 0;
+            // 通用標配 (讀取 Config)
+            const chairs = CONFIG_DB.global_chairs || 25;
+            list.innerHTML += `<li class="text-white font-bold">通用：竹節椅 ${chairs}張、200吋投影、音響麥克風</li>`;
             
-            let extraHours = addonQuantities['time_plus'] || 0;
-            let finalDuration = bookingData.baseDuration + extraHours;
-            let [sh, sm] = bookingData.baseStart.split(':').map(Number);
-            let totalMin = sh * 60 + sm + (finalDuration * 60);
-            let eh = Math.floor(totalMin / 60);
-            let em = totalMin % 60;
-            let suffix = "";
-            if (eh >= 24) { eh -= 24; suffix = " (+1)"; }
-            let finalTimeStr = `${eh < 10 ? '0'+eh : eh}:${em === 0 ? '00' : em}${suffix}`;
-            
-            document.getElementById('invTimeRange').innerText = `${bookingData.baseStart} - ${finalTimeStr}`;
-            document.getElementById('invTotalHours').innerText = `共 ${finalDuration} 小時 ${extraHours>0 ? `(原${bookingData.baseDuration}+加${extraHours})` : ''}`;
-            document.getElementById('invDate').innerText = `${bookingData.date} ${isWeekend?"(假日)":"(平日)"}`;
-            bookingData.finalEndTime = finalTimeStr;
-
-            if (currentPlan.includes && currentPlan.includes.length > 0) {
+            // 方案標配
+            if(currentPlan.includes && currentPlan.includes.length > 0) {
                 currentPlan.includes.forEach(incId => {
-                    const opt = addOnOptions.find(o => o.id === incId);
-                    if(opt) listContainer.innerHTML += `<li class="flex justify-between items-center text-gray-400 text-xs italic"><span>${opt.name}</span> <span>(方案內含)</span></li>`;
+                    const item = ADDONS_DB.find(a => a.id === incId);
+                    if(item) {
+                        list.innerHTML += `<li class="text-neon-pink">${item.name}</li>`;
+                    }
                 });
             }
+        }
 
-            let hasAddons = false;
-            addOnOptions.forEach(opt => {
-                if(opt.type === 'counter') {
-                    const count = addonQuantities[opt.id] || 0;
-                    if(count > 0) {
-                        hasAddons = true;
-                        let price = opt.price;
-                        if(opt.id === 'time_plus') price = isWeekend ? 5000 : 3000;
-                        let subtotal = price * count;
-                        
-                        // 單位顯示
-                        let unit = '';
-                        if(opt.id === 'time_plus') unit = 'hr';
-                        else if(opt.id.includes('table') || opt.id.includes('chair')) unit = '張';
-                        else if(opt.id.includes('box')) unit = '盒';
+        // ★★★ 核心邏輯：渲染加購清單 (含互斥/升級判斷) ★★★
+        function renderAddons() {
+            const container = document.getElementById('addonList');
+            container.innerHTML = '';
+            
+            const planIncludes = new Set(currentPlan.includes || []);
+            
+            ADDONS_DB.forEach(addon => {
+                // 1. 如果方案已包含此 ID -> 隱藏加購 (避免重複買)
+                // 例外：table_6 若方案含，我們希望顯示為「額外加租」，但這邊先簡化為不顯示，由客人自己加「桌子(單租)」
+                if(planIncludes.has(addon.id)) return;
 
-                        listContainer.innerHTML += `<li class="flex justify-between items-center border-b border-gray-200 pb-1 mt-2"><span>${opt.name} x ${count}${unit}</span> <span class="text-gray-600 font-medium">+$${subtotal.toLocaleString()}</span></li>`;
-                        totalAddonPrice += subtotal;
+                // 2. 處理 Logic Tag (Google Sheet 設定的規則)
+                if(addon.logicTag) {
+                    // conflict:xxx -> 若方案含 xxx 則隱藏此項
+                    if(addon.logicTag.startsWith('conflict:')) {
+                        const conflictId = addon.logicTag.split(':')[1];
+                        if(planIncludes.has(conflictId)) return;
                     }
+                    // require:xxx -> 若方案含 xxx 才顯示 (例如升級選項)
+                    if(addon.logicTag.startsWith('require:')) {
+                        const reqId = addon.logicTag.split(':')[1];
+                        if(!planIncludes.has(reqId)) return;
+                    }
+                    // hide_if:xxx -> 若方案含 xxx 則隱藏 (例如有DJ就不能選加購DJ，只能選升級歌手)
+                    if(addon.logicTag.startsWith('hide_if:')) {
+                        const hideId = addon.logicTag.split(':')[1];
+                        if(planIncludes.has(hideId)) return;
+                    }
+                }
+
+                // 3. 渲染按鈕
+                const price = isWeekend ? addon.priceWeekend : addon.priceWeekday;
+                const div = document.createElement('div');
+                
+                if(addon.type === 'counter') {
+                    // 計數器 UI
+                    const qty = addonQuantities[addon.id] || 0;
+                    const activeClass = qty > 0 ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600';
+                    const priceColor = qty > 0 ? 'text-neon-blue' : 'text-gray-400';
+                    
+                    div.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center transition select-none`;
+                    div.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-white">${addon.name}</span>
+                            <span class="text-xs text-gray-500">$${price}/${addon.unit}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="counter-btn" onclick="updateCounter('${addon.id}', -1, ${addon.min}, ${addon.max})"><i class="fas fa-minus text-white text-xs"></i></div>
+                            <span id="count_${addon.id}" class="text-white font-bold w-6 text-center">${qty}</span>
+                            <div class="counter-btn" onclick="updateCounter('${addon.id}', 1, ${addon.min}, ${addon.max})"><i class="fas fa-plus text-white text-xs"></i></div>
+                        </div>
+                    `;
                 } else {
-                    if(selectedAddons.has(opt.id)) {
-                        hasAddons = true;
-                        listContainer.innerHTML += `<li class="flex justify-between items-center border-b border-gray-200 pb-1 mt-2"><span>${opt.name}</span> <span class="text-gray-600 font-medium">+$${opt.price.toLocaleString()}</span></li>`;
-                        totalAddonPrice += opt.price;
+                    // 開關 UI
+                    const isSel = selectedAddons.has(addon.id);
+                    const activeClass = isSel ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600 hover:bg-zinc-800';
+                    const iconClass = isSel ? 'opacity-100 bg-neon-blue text-black border-neon-blue' : 'opacity-30 border-zinc-500';
+                    
+                    div.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center cursor-pointer transition select-none`;
+                    div.onclick = () => toggleAddon(addon.id);
+                    div.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="check-icon w-5 h-5 rounded-full border ${iconClass} mr-3 flex items-center justify-center transition-all"><i class="fas fa-check text-[10px]"></i></div>
+                            <span class="text-sm font-bold text-white">${addon.name}</span>
+                        </div>
+                        <span class="${isSel ? 'text-neon-pink' : 'text-gray-400'} text-sm font-bold">$${price}</span>
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+
+        // UI 互動函數
+        function updateCounter(id, delta, min, max) {
+            let current = addonQuantities[id] || 0;
+            let next = current + delta;
+            
+            // Min 邏輯處理 (從0加時直接跳 Min)
+            if(min > 0) {
+                if(current === 0 && delta > 0) next = min;
+                else if(current === min && delta < 0) next = 0;
+                else if(next < min && next > 0) next = min;
+            }
+            
+            if(next < 0) next = 0;
+            if(next > max) { alert(`此項目上限為 ${max}`); next = max; }
+            
+            addonQuantities[id] = next;
+            renderAddons(); // 刷新 UI 狀態
+        }
+
+        function toggleAddon(id) {
+            if(selectedAddons.has(id)) selectedAddons.delete(id);
+            else selectedAddons.add(id);
+            renderAddons();
+        }
+
+        // 7. 計算總價 -> 進入 Step 3
+        function expandFinal() {
+            let basePrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+            if(currentSlotMode === 'allday' && currentPlan.id === 'rental') basePrice = isWeekend ? 36000 : 20000;
+            // 包套全日先粗抓 x2 (若有需要可再精修)
+            if(currentSlotMode === 'allday' && currentPlan.id !== 'rental') basePrice = basePrice * 2;
+
+            let addonTotal = 0;
+            const invAddons = document.getElementById('invAddons');
+            invAddons.innerHTML = '';
+
+            // 計算計數項目
+            for (const [id, qty] of Object.entries(addonQuantities)) {
+                if (qty > 0) {
+                    const item = ADDONS_DB.find(a => a.id === id);
+                    if(item) {
+                        const price = isWeekend ? item.priceWeekend : item.priceWeekday;
+                        const sub = price * qty;
+                        addonTotal += sub;
+                        invAddons.innerHTML += `<li class="flex justify-between border-b border-gray-200 pb-1"><span>${item.name} x ${qty}</span><span>$${sub.toLocaleString()}</span></li>`;
                     }
+                }
+            }
+
+            // 計算開關項目
+            selectedAddons.forEach(id => {
+                const item = ADDONS_DB.find(a => a.id === id);
+                if(item) {
+                    const price = isWeekend ? item.priceWeekend : item.priceWeekday;
+                    addonTotal += price;
+                    invAddons.innerHTML += `<li class="flex justify-between border-b border-gray-200 pb-1"><span>${item.name}</span><span>$${price.toLocaleString()}</span></li>`;
                 }
             });
 
-            if(!hasAddons) listContainer.innerHTML += '<li class="text-gray-500 italic mt-2">無額外加購</li>';
+            if(invAddons.innerHTML === '') invAddons.innerHTML = '<li class="text-gray-400 italic">無加購項目</li>';
+
+            const total = basePrice + addonTotal;
+            document.getElementById('invPlanName').innerText = currentPlan.name;
+            document.getElementById('invPlanPrice').innerText = `$${basePrice.toLocaleString()}`;
+            document.getElementById('invDate').innerText = `${document.getElementById('dateInput').value} ${isWeekend?"(假日)":"(平日)"}`;
             
-            const finalTotal = bookingData.planPrice + totalAddonPrice;
-            document.getElementById('invTotal').innerText = (bookingData.planPrice === 0) ? "另行報價" : "NT$ " + finalTotal.toLocaleString();
-            bookingData.finalTotal = finalTotal;
-            
-            document.getElementById('step4').classList.remove('hidden');
-            document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // 時間字串整理
+            let timeStr = "";
+            if(currentSlotMode === 'lunch') timeStr = "11:00-14:00";
+            else if(currentSlotMode === 'dinner') timeStr = "17:00-20:00";
+            else if(currentSlotMode === 'allday') timeStr = "09:00-21:00";
+            else {
+                const start = document.getElementById('startTime').value;
+                const end = document.getElementById('endTimeDisplay').value.split(' ')[0];
+                timeStr = `${start}-${end}`;
+            }
+            document.getElementById('invTimeRange').innerText = timeStr;
+            document.getElementById('invTotal').innerText = `NT$ ${total.toLocaleString()}`;
+
+            // 儲存資料供發送
+            bookingData = {
+                planName: currentPlan.name,
+                date: document.getElementById('dateInput').value,
+                time: timeStr,
+                total: total,
+                details: invAddons.innerHTML
+            };
+
+            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
+        // 8. 發送至 LINE
         function sendFinalToLine() {
-            const name = document.getElementById('guestName').value.trim();
-            const phone = document.getElementById('guestPhone').value.trim();
-            if (!name) { alert("❌ 請填寫「預約人姓名」"); document.getElementById('guestName').focus(); return; }
-            const phoneRegex = /^09\d{8}$/;
-            if (!phoneRegex.test(phone)) { alert("❌ 請填寫正確的「台灣手機號碼」"); document.getElementById('guestPhone').focus(); return; }
+            const name = document.getElementById('guestName').value;
+            const phone = document.getElementById('guestPhone').value;
+            if(!name || !phone) { alert("請填寫姓名與電話"); return; }
 
-            let msg = `您好！我想預約 RUINS BAR 廢墟場地 🥂\n\n`;
+            // 產生純文字報表
+            let detailsText = "";
+            for (const [id, qty] of Object.entries(addonQuantities)) {
+                if (qty > 0) {
+                    const item = ADDONS_DB.find(a => a.id === id);
+                    if(item) detailsText += `- ${item.name} x ${qty} ${item.unit}\n`;
+                }
+            }
+            selectedAddons.forEach(id => {
+                const item = ADDONS_DB.find(a => a.id === id);
+                if(item) detailsText += `- ${item.name}\n`;
+            });
+            if(detailsText === "") detailsText = "無\n";
+
+            // 方案標配也列出來比較清楚
+            let includesText = "";
+            if(currentPlan.includes && currentPlan.includes.length > 0) {
+                currentPlan.includes.forEach(incId => {
+                    const item = ADDONS_DB.find(a => a.id === incId);
+                    if(item) includesText += `- ${item.name} (內含)\n`;
+                });
+            }
+
+            let msg = `您好！我想預約 RUINS BAR 🥂\n\n`;
             msg += `👤 姓名：${name}\n📱 電話：${phone}\n------------------------\n`;
             msg += `📅 日期：${bookingData.date} ${isWeekend?"(假日)":"(平日)"}\n`;
-            msg += `⏰ 時段：${bookingData.baseStart} - ${bookingData.finalEndTime}\n`;
-            msg += `📋 方案：${bookingData.planName}\n`;
-            
-            if (currentPlan.includes && currentPlan.includes.length > 0) {
-                msg += `\n✅ 內含項目：\n`;
-                currentPlan.includes.forEach(incId => {
-                    const opt = addOnOptions.find(o => o.id === incId);
-                    if(opt) msg += `- ${opt.name}\n`;
-                });
-            }
+            msg += `⏰ 時段：${bookingData.time}\n`;
+            msg += `📋 方案：${bookingData.planName}\n\n`;
+            msg += `✅ 方案內含：\n${includesText}\n`;
+            msg += `➕ 加購/升級：\n${detailsText}\n`;
+            msg += `💰 預估總價：NT$ ${bookingData.total.toLocaleString()}\n`;
+            msg += `\n請協助確認檔期，謝謝！`;
 
-            msg += `\n➕ 加購/升級：\n`;
-            let hasAddons = false;
-            addOnOptions.forEach(opt => {
-                 if(opt.type === 'counter') {
-                    const count = addonQuantities[opt.id] || 0;
-                    if(count > 0) {
-                        hasAddons = true;
-                        let unit = '';
-                        if(opt.id === 'time_plus') unit = 'hr';
-                        else if(opt.id.includes('table') || opt.id.includes('chair')) unit = '張';
-                        else if(opt.id.includes('box')) unit = '盒';
-                        msg += `- ${opt.name} x ${count}${unit}\n`;
-                    }
-                } else {
-                    if(selectedAddons.has(opt.id)) {
-                        hasAddons = true;
-                        msg += `- ${opt.name}\n`;
-                    }
-                }
-            });
-            if(!hasAddons) msg += `無\n`;
-            
-            if(bookingData.planPrice === 0) { msg += `\n💰 預估總價：待專人報價\n`; } 
-            else { msg += `\n💰 預估總價：NT$ ${bookingData.finalTotal.toLocaleString()}\n`; }
-            msg += `\n請協助確認檔期與最終報價，謝謝！`;
-            
+            // 複製並跳轉
             copyToClipboard(msg).then(() => {
-                closeModal(); 
                 document.getElementById('copySuccessModal').classList.remove('hidden');
-            }).catch(() => {
-                alert("複製失敗，請手動截圖");
-                window.location.href = LINE_DEEP_LINK;
+                closeModal();
             });
         }
 
+        // 工具：初始化自訂時間選單 (09:00 - 23:00)
+        function initCustomTimeSelects() {
+            const s = document.getElementById('startTime');
+            for (let i = 18; i <= 46; i++) { 
+                const hour = Math.floor(i / 2);
+                const min = (i % 2) === 0 ? '00' : '30';
+                const t = `${hour < 10 ? '0'+hour : hour}:${min}`;
+                s.add(new Option(t, t));
+            }
+        }
+        function updateEndTime() {
+            const startVal = document.getElementById('startTime').value;
+            if(!startVal) return;
+            const [h, m] = startVal.split(':').map(Number);
+            let endH = h + 3; // 預設 3hr
+            let suffix = "";
+            if(endH >= 24) { endH -= 24; suffix = "(+1)"; }
+            const t = `${endH < 10 ? '0'+endH : endH}:${m===0?'00':m}${suffix}`;
+            document.getElementById('endTimeDisplay').value = t + " (3hr)";
+        }
         function copyToClipboard(text) {
-            return new Promise((resolve, reject) => {
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text).then(resolve).catch(() => fallbackCopy(text, resolve, reject));
-                } else { fallbackCopy(text, resolve, reject); }
-            });
-        }
-        function fallbackCopy(text, resolve, reject) {
-            try {
-                const textArea = document.createElement("textarea");
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            } else {
+                // Fallback for older browsers
+                let textArea = document.createElement("textarea");
                 textArea.value = text;
-                textArea.style.position = "fixed"; textArea.style.left = "0"; textArea.style.top = "0"; textArea.style.opacity = "0";
+                textArea.style.position = "fixed";
                 document.body.appendChild(textArea);
-                textArea.focus(); textArea.select();
-                const successful = document.execCommand('copy');
+                textArea.focus();
+                textArea.select();
+                try { document.execCommand('copy'); } catch (err) {}
                 document.body.removeChild(textArea);
-                if (successful) resolve(); else reject();
-            } catch (err) { reject(err); }
+                return Promise.resolve();
+            }
         }
-        function goToLine() { closeCopyModal(); window.location.href = LINE_DEEP_LINK; }
+        function goToLine() { window.location.href = LINE_DEEP_LINK; }
         function closeCopyModal() { document.getElementById('copySuccessModal').classList.add('hidden'); }
-        function directLine() { window.location.href = LINE_DEEP_LINK; }
     </script>
 </body>
 </html>

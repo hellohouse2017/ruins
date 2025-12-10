@@ -3,411 +3,838 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>廢墟Bar - 場地租借預約</title>
-    <meta name="description" content="高雄鹽埕區最獨特的廢墟風格場地租借，適合派對、求婚、抓周。">
+    <title>Ruins Bar 高雄廢墟場地租借 | 預約系統</title>
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ruin-dark': '#121212',
+                        'ruin-gray': '#1e1e1e',
+                        'neon-pink': '#ff0055',
+                        'neon-blue': '#00f3ff',
+                        'champagne': '#d4af37',
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        display: ['"Oswald"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary-color: #5a5a5a; /* 工業風主色 */
-            --accent-color: #d63384;  /* 點綴色 */
-            --bg-light: #f8f9fa;
-        }
+        body { background-color: #121212; color: #e0e0e0; }
+        input[type="date"] { position: relative; font-size: 1.1rem; }
+        input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        
+        .addon-btn.selected { border-color: #00f3ff; background-color: rgba(0, 243, 255, 0.1); color: white; }
+        .addon-btn.selected .check-icon { opacity: 1; background-color: #00f3ff; color: black; }
+        .addon-btn.included { border-color: #06c755; background-color: rgba(6, 199, 85, 0.1); color: #88ffaa; cursor: default; }
+        
+        .plan-card { transition: all 0.3s ease; }
+        .plan-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+        .plan-card:hover img { transform: scale(1.05); }
+        .plan-card img { transition: transform 0.8s ease; }
+        .wedding-card:hover { border-color: #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
 
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            color: #333;
-            line-height: 1.6;
-            padding-top: 76px; /* 避開固定的 Navbar */
-        }
+        .sticky-btn { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background-color: #06c755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 40; transition: all 0.3s ease; text-decoration: none; cursor: pointer; animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(6, 199, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0); } }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .counter-btn { width: 30px; height: 30px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .counter-btn:hover { background: #555; }
 
-        /* 導航列 */
-        .navbar {
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        /* 主視覺 Banner */
-        .hero-section {
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); /* 暫用圖庫圖片 */
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 100px 0;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        /* 計算機卡片樣式 */
-        .calculator-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            padding: 40px;
-            border: 1px solid #eee;
-        }
-        .section-title {
-            border-left: 5px solid var(--primary-color);
-            padding-left: 15px;
-            margin-bottom: 25px;
-            font-weight: 700;
-            color: #444;
-        }
-
-        /* 輸入框微調 */
-        .quantity-input {
-            text-align: center;
-            font-weight: bold;
-            background-color: #fff;
-        }
-        .btn-qty {
-            border-color: #ced4da;
-        }
-        .btn-qty:hover {
-            background-color: #e9ecef;
-        }
-
-        /* 價格顯示 */
-        .total-price-section {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 30px;
-            text-align: center;
-        }
-        .final-price {
-            font-size: 2.5rem;
-            color: #dc3545;
-            font-weight: 800;
-        }
-
-        /* 提示文字優化 */
-        .hint-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-        .hint-highlight {
-            color: #d63384;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-
-        /* FAQ 區塊 */
-        .faq-section {
-            padding: 60px 0;
-            background-color: #fff;
-        }
-        .accordion-button:not(.collapsed) {
-            background-color: #e2e6ea;
-            color: #333;
-        }
-
-        /* 頁尾 */
-        footer {
-            background-color: #343a40;
-            color: #aaa;
-            padding: 40px 0;
-            margin-top: 60px;
-        }
-        footer h5 {
-            color: white;
-            margin-bottom: 20px;
-        }
-        footer a {
-            color: #aaa;
-            text-decoration: none;
-        }
-        footer a:hover {
-            color: white;
-        }
+        .slot-btn { background-color: #1a1a1a; border: 1px solid #444; color: #888; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .slot-btn:hover { border-color: #666; color: white; }
+        .slot-btn.active { background-color: rgba(0, 243, 255, 0.15); border-color: #00f3ff; color: #00f3ff; font-weight: bold; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+        .slot-btn span { font-size: 0.75rem; font-weight: normal; opacity: 0.8; }
+        
+        #loadingOverlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px); transition: opacity 0.5s; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="font-sans antialiased selection:bg-neon-pink selection:text-white pb-24">
 
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#"><i class="bi bi-building"></i> 廢墟Bar</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#calculator">費用試算</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#rules">租借規範</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contact">聯絡我們</a></li>
-                </ul>
+    <div id="loadingOverlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-neon-pink mb-4"></div>
+        <p class="text-white text-lg font-bold">正在讀取最新方案...</p>
+        <p class="text-gray-400 text-sm mt-2">Connecting to Google Database</p>
+    </div>
+
+
+    <nav class="fixed w-full z-50 bg-ruin-dark/95 backdrop-blur-md border-b border-white/10 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-display text-2xl font-bold tracking-wider text-white">RUINS <span class="text-neon-pink">BAR</span></span>
+                </div>
+                <div class="hidden lg:block">
+                    <div class="ml-10 flex items-baseline space-x-6">
+                        <a href="#plans-section" class="text-neon-blue hover:text-white transition px-3 py-2 rounded-md text-sm font-bold border border-neon-blue cursor-pointer"><i class="fas fa-calendar-check mr-1"></i> 方案預約</a>
+                        <a href="#gallery" class="hover:text-neon-pink transition px-3 py-2 rounded-md text-sm font-medium">實錄</a>
+                        <a href="#reviews" class="hover:text-neon-pink transition px-3 py-2 rounded-md text-sm font-medium">好評</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <section class="hero-section">
-        <div class="container">
-            <h1 class="hero-title">專屬於您的獨特空間</h1>
-            <p class="lead">廢墟風格 / 抓周派對 / 求婚驚喜 / 商業攝影</p>
-            <a href="#calculator" class="btn btn-light btn-lg mt-3 fw-bold">立即試算價格</a>
-        </div>
-    </section>
-
-    <div class="container" id="calculator">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                
-                <div class="calculator-card">
-                    <h3 class="text-center mb-4"><i class="bi bi-calculator"></i> 場地費用試算</h3>
-                    
-                    <div class="mb-4">
-                        <div class="section-title">步驟一：選擇方案與日期</div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="planType" class="form-label fw-bold">租借方案</label>
-                                <select class="form-select form-select-lg" id="planType" onchange="updateBaseInfo()">
-                                    <option value="pure" selected>純場地租借 (基本3小時)</option>
-                                    <option value="zhuazhou">抓周方案 (基本2小時)</option>
-                                    <option value="gender">性別派對 (基本2小時)</option>
-                                    <option value="proposal">求婚方案 (基本2小時)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">預計日期</label>
-                                <div class="btn-group w-100" role="group">
-                                    <input type="radio" class="btn-check" name="dayType" id="weekday" value="weekday" checked onclick="calculateTotal()">
-                                    <label class="btn btn-outline-secondary btn-lg" for="weekday">平日 (週一~四)</label>
-
-                                    <input type="radio" class="btn-check" name="dayType" id="holiday" value="holiday" onclick="calculateTotal()">
-                                    <label class="btn btn-outline-secondary btn-lg" for="holiday">假日 (週五~日)</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="mb-4">
-                        <div class="section-title">步驟二：加購項目 (選填)</div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold d-flex justify-content-between">
-                                <span>加購額外時數</span>
-                                <span class="badge bg-secondary">每小時 +$1500</span>
-                            </label>
-                            <div class="input-group">
-                                <button class="btn btn-qty" onclick="updateQty('extraHours', -1)">-</button>
-                                <input type="number" class="form-control quantity-input" id="extraHours" value="0" min="0" readonly>
-                                <button class="btn btn-qty" onclick="updateQty('extraHours', 1)">+</button>
-                            </div>
-                            <div class="hint-box">
-                                <i class="bi bi-info-circle-fill me-1"></i>
-                                本方案已內含 <strong id="baseHourDisplay">3</strong> 小時。
-                                <span class="hint-highlight">這裡只需填寫您想「延長」的時數。</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold d-flex justify-content-between">
-                                <span>加購額外竹節椅</span>
-                                <span class="badge bg-secondary">每張 +$50</span>
-                            </label>
-                            <div class="input-group">
-                                <button class="btn btn-qty" onclick="updateQty('addChairs', -1)">-</button>
-                                <input type="number" class="form-control quantity-input" id="addChairs" value="0" min="0" readonly>
-                                <button class="btn btn-qty" onclick="updateQty('addChairs', 1)">+</button>
-                            </div>
-                            <div class="hint-box">
-                                <i class="bi bi-info-circle-fill me-1"></i>
-                                現場已提供基本 25 張椅子。
-                                <span class="hint-highlight">這裡只需填寫「額外增加」的數量。</span>
-                            </div>
-                        </div>
-
-                        <div class="form-check form-switch p-3 bg-light rounded">
-                            <input class="form-check-input" type="checkbox" id="cleaningFee" onchange="calculateTotal()" style="width: 3em; margin-left: -2.5em; margin-right: 0.5em;">
-                            <label class="form-check-label fw-bold" for="cleaningFee">
-                                需要代客清潔服務 (+$1000)
-                                <small class="d-block text-muted fw-normal">若自行清潔復原，可省下此費用</small>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="total-price-section">
-                        <h5 class="text-muted mb-2">預估總金額</h5>
-                        <div class="final-price">NT$ <span id="totalPrice">0</span></div>
-                        <p class="text-muted mt-2 small">*此為線上試算，實際報價以官方Line回覆為準</p>
-                        <button class="btn btn-dark w-100 btn-lg mt-2">
-                            <i class="bi bi-line"></i> 加入 Line 預約
-                        </button>
-                    </div>
-
-                </div>
-                </div>
+    <div class="relative bg-ruin-gray h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0 opacity-40 bg-cover bg-center grayscale" style="background-image: url('images/cover-bg.jpg');"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-ruin-dark via-transparent to-ruin-dark z-10"></div>
+        <div class="relative z-20 text-center px-4">
+            <h1 class="font-display text-5xl md:text-7xl font-bold text-white mb-4 tracking-widest neon-text-pink">INDUSTRIAL RUINS</h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto font-light">高雄鹽埕 × 廢墟美學 × 極致派對體驗</p>
+            <a href="#plans-section" class="inline-block bg-neon-pink text-white font-bold py-4 px-10 rounded-full hover:bg-pink-600 transition duration-300 shadow-[0_0_20px_rgba(255,0,85,0.5)] cursor-pointer">
+                開始預約旅程
+            </a>
         </div>
     </div>
 
-    <section class="faq-section mt-5" id="rules">
-        <div class="container">
-            <h3 class="text-center mb-5 fw-bold">常見問題與規範</h3>
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="accordion" id="faqAccordion">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                    Q1. 場地租借包含哪些基本設備？
-                                </button>
-                            </h2>
-                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">
-                                    包含基本燈光、冷氣、藍牙音響、25張竹節椅、長桌兩張。投影設備需另外洽詢。
-                                </div>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                    Q2. 可以提早進場佈置嗎？
-                                </button>
-                            </h2>
-                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">
-                                    租借時間包含場佈與撤場時間，若需提早進場，建議加購時數。
-                                </div>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
-                                    Q3. 垃圾需要自行帶走嗎？
-                                </button>
-                            </h2>
-                            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">
-                                    原則上需自行帶走垃圾並復原場地。若加購「清潔服務」，則可將垃圾打包留置現場由我們處理。
-                                </div>
-                            </div>
+
+
+
+
+    <section id="plans-section" class="py-20 px-4 bg-ruin-dark relative z-30">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold text-white mb-10 text-center flex items-center justify-center"><i class="fas fa-list-ul text-neon-blue mr-3"></i> 選擇您的活動方案</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                <div onclick="handleCardClick('proposal')" class="plan-card cursor-pointer group relative rounded-2xl overflow-hidden border-2 border-neon-pink/50 shadow-[0_0_30px_rgba(255,0,85,0.15)] hover:border-neon-pink bg-zinc-900 flex flex-col">
+                    <div class="h-80 md:h-96 overflow-hidden relative w-full">
+                        <img src="images/proposal-cover.jpg" onerror="this.src='https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1000'" class="w-full h-full object-cover">
+                        <div class="absolute bottom-6 left-8 z-10">
+                            <div class="text-white font-bold text-2xl mb-1 flex items-center"><i class="fas fa-heart text-neon-pink mr-3"></i> 浪漫求婚包場</div>
                         </div>
                     </div>
+                    <div class="p-8 flex-grow flex flex-col justify-between">
+                        <p class="text-gray-300 mb-4 text-base leading-relaxed">包含氣球佈置、MerryMe燈條與求婚花束。</p>
+                        <div class="text-right text-neon-pink font-bold group-hover:translate-x-2 transition mt-4">查看方案 <i class="fas fa-arrow-right ml-1"></i></div>
+                    </div>
+                </div>
+
+                <div onclick="showSubPlanModal(['wedding_A', 'wedding_B'])" class="plan-card wedding-card cursor-pointer group relative rounded-2xl overflow-hidden border-2 border-champagne/50 shadow-[0_0_30px_rgba(212,175,55,0.15)] bg-zinc-900 flex flex-col">
+                    <div class="h-80 md:h-96 overflow-hidden relative w-full">
+                        <img src="images/wedding-cover.jpg" onerror="this.src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1000'" class="w-full h-full object-cover">
+                        <div class="absolute bottom-6 left-8 z-10">
+                            <div class="text-white font-bold text-2xl mb-1 flex items-center"><i class="fas fa-ring text-champagne mr-3"></i> 婚禮派對 & 證婚</div>
+                        </div>
+                    </div>
+                    <div class="p-8 flex-grow flex flex-col justify-between">
+                        <p class="text-gray-300 mb-4 text-base leading-relaxed">提供 After Party 與 證婚儀式+派對 雙重選擇。</p>
+                        <div class="text-right text-champagne font-bold group-hover:translate-x-2 transition mt-4">查看詳細 <i class="fas fa-arrow-right ml-1"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div onclick="handleCardClick('baby')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">抓周 / 性別派對</h4>
+                    <p class="text-gray-500 text-xs">含氣球佈置、道具、點心</p>
+                </div>
+                <div onclick="handleCardClick('party')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">慶生 / 各式派對</h4>
+                    <p class="text-gray-500 text-xs">含酒水、精緻點心</p>
+                </div>
+                <div onclick="handleCardClick('rental')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">純場地租借</h4>
+                    <p class="text-gray-500 text-xs">最自由的空間使用</p>
+                </div>
+                <div onclick="handleCardClick('meeting')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                    <h4 class="text-lg font-bold text-white mb-1">會議包場方案</h4>
+                    <p class="text-gray-500 text-xs">含桌椅、飲品</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer id="contact">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5>關於 廢墟Bar</h5>
-                    <p>位於高雄鹽埕區，保留老屋原始斑駁美感，提供獨一無二的場地租借體驗。</p>
+    <div id="subPlanModal" class="hidden fixed inset-0 z-[70] overflow-y-auto" role="dialog">
+        <div class="fixed inset-0 bg-black/90 transition-opacity backdrop-blur-sm" onclick="closeSubModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative transform overflow-hidden rounded-2xl bg-zinc-900 text-left shadow-2xl w-full max-w-lg border border-zinc-700">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-white mb-4 text-center">請選擇詳細方案</h3>
+                    <div id="subPlanContainer" class="space-y-4"></div>
+                    <button onclick="closeSubModal()" class="mt-6 w-full text-gray-500 text-sm">取消</button>
                 </div>
-                <div class="col-md-4">
-                    <h5>聯絡資訊</h5>
-                    <ul class="list-unstyled">
-                        <li><i class="bi bi-geo-alt-fill"></i> 高雄市鹽埕區大公路xx號</li>
-                        <li><i class="bi bi-telephone-fill"></i> 09xx-xxx-xxx</li>
-                        <li><i class="bi bi-clock-fill"></i> 10:00 - 20:00</li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>關注我們</h5>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="fs-4"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="fs-4"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="fs-4"><i class="bi bi-line"></i></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <div id="bookingModal" class="hidden fixed inset-0 z-[60] overflow-y-auto">
+        <div class="fixed inset-0 bg-black/80 transition-opacity backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-2xl bg-zinc-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-zinc-700">
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white z-10 p-2"><i class="fas fa-times text-2xl"></i></button>
+
+                <div class="max-h-[85vh] overflow-y-auto p-6 scrollbar-hide">
+                    <h3 class="text-center text-white font-bold mb-2 text-2xl flex justify-center items-center"><i class="fas fa-calendar-alt text-neon-blue mr-3"></i> 預約試算</h3>
+                    <div class="bg-zinc-800 p-3 rounded-lg mb-6 text-center border border-zinc-700">
+                        <span class="text-gray-400 text-xs block">您目前選擇的方案</span>
+                        <span id="selectedPlanDisplay" class="text-neon-pink font-bold text-lg"></span>
+                    </div>
+
+                    <div id="step1">
+                        <form id="checkForm" onsubmit="handleCheck(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-neon-blue text-sm font-bold mb-1">1. 選擇預計日期</label>
+                                <div class="relative"><input type="date" id="dateInput" onchange="checkLogic()" onclick="this.showPicker()" required class="w-full bg-black border border-zinc-700 text-white rounded-lg p-3 focus:border-neon-blue focus:outline-none cursor-pointer"></div>
+                                <p id="dayTypeLabel" class="text-xs text-gray-500 mt-1 text-right"></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+                            <div>
+                                <label class="block text-neon-blue text-sm font-bold mb-1">2. 選擇時段</label>
+                                <div class="grid grid-cols-3 gap-2 mb-4" id="standardSlots">
+                                    <button type="button" onclick="selectSlot('lunch')" id="btnLunch" class="slot-btn py-2 rounded-lg text-sm font-bold">午場<br><span class="text-xs font-normal">11:00-14:00</span></button>
+                                    <button type="button" onclick="selectSlot('dinner')" id="btnDinner" class="slot-btn py-2 rounded-lg text-sm font-bold">晚場<br><span class="text-xs font-normal">17:00-20:00</span></button>
+                                    <button type="button" onclick="selectSlot('allday')" id="btnAllDay" class="slot-btn py-2 rounded-lg text-sm font-bold hidden">全日<br><span class="text-xs font-normal">09:00-21:00</span></button>
+                                </div>
+                                <div class="relative border-t border-zinc-700 pt-4 mt-2">
+                                    <p class="text-xs text-gray-400 mb-2">或 自訂開始時間 (結束自動計算)</p>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div><label class="text-white text-xs">開始</label><select id="startTime" onchange="customTimeTrigger()" class="w-full bg-black border-zinc-600 text-white rounded p-1"></select></div>
+                                        <div><label class="text-white text-xs">結束</label><input type="text" id="endTimeDisplay" readonly class="w-full bg-[#1a1a1a] border border-zinc-600 text-gray-400 rounded p-1 text-center" value="自動計算"><input type="hidden" id="endTime"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="submitBtn" type="submit" class="w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] transition shadow-lg mt-4 cursor-pointer active:scale-95">確認檔期並報價 <i class="fas fa-search ml-2"></i></button>
+                        </form>
+                    </div>
+
+                    <div id="step2" class="hidden mt-6 border-t border-zinc-700 pt-6 animate-fade-in-down">
+                        <div class="bg-zinc-800/80 p-4 rounded-xl border-l-4 border-green-500 mb-4">
+                            <h4 class="text-green-400 font-bold text-lg mb-1"><i class="fas fa-check-circle"></i> 方案基礎費用：$<span id="basePriceDisplay"></span></h4>
+                            <div class="mt-3 border-t border-zinc-600 pt-3">
+                                <p class="text-xs text-gray-400 mb-1">✅ 方案內含 (自動選取/折抵)：</p>
+                                <ul id="includedFeatures" class="text-sm text-gray-300 list-disc list-inside space-y-1"></ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-white font-bold mb-4 flex items-center text-lg mt-6"><span class="bg-neon-pink text-white text-xs px-2 py-1 rounded mr-3">加購</span> 專屬服務選單</h3>
+                        <div class="grid grid-cols-1 gap-3 mb-6" id="addonList"></div>
+                        
+                        <button onclick="expandFinal()" class="w-full bg-neon-pink text-white font-bold py-3 rounded-lg hover:bg-pink-600 transition shadow-[0_0_15px_rgba(255,0,85,0.4)]">計算總價 <i class="fas fa-calculator ml-2"></i></button>
+                    </div>
+
+                    <div id="step3" class="hidden mt-6 border-t border-zinc-700 pt-6 animate-fade-in-down">
+                        <div class="bg-white text-black p-5 rounded-xl shadow-2xl relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-neon-blue to-neon-pink"></div>
+                            <h4 class="font-bold text-xl mb-4 border-b border-gray-200 pb-2 text-center">預約試算結果</h4>
+                            
+                            <div class="space-y-3 text-sm mb-4">
+                                <div class="flex justify-between items-center"><span class="text-gray-600 font-bold">預約方案</span><span id="invPlanName" class="font-bold text-right"></span></div>
+                                <div class="flex justify-between items-center text-gray-500 text-xs"><span></span><span id="invPlanPrice"></span></div>
+                                <div class="flex justify-between items-center border-t border-gray-200 pt-2"><span class="text-gray-600 font-bold">預約日期</span><span id="invDate" class="font-bold text-right text-xs"></span></div>
+                                <div class="flex justify-between items-center text-gray-500 text-xs"><span>時段</span><span id="invTimeRange"></span></div>
+                            </div>
+                            
+                            <div class="bg-gray-100 p-3 rounded-lg mb-4">
+                                <p class="text-xs text-gray-500 mb-2 font-bold uppercase">加購/升級項目</p>
+                                <ul id="invAddons" class="text-sm space-y-2"></ul>
+                            </div>
+
+
+                            <div class="flex justify-between items-end border-t border-gray-300 pt-4 mb-6">
+                                <span class="text-gray-600 font-bold text-lg">預估總價</span>
+                                <span id="invTotal" class="text-3xl font-bold text-neon-pink"></span>
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-4">
+                                <h5 class="font-bold text-gray-700 mb-3 flex items-center"><i class="fas fa-user-edit mr-2"></i> 預約人資料</h5>
+                                <div class="mb-3">
+                                    <label class="block text-gray-500 text-xs font-bold mb-1">您的姓名</label>
+                                    <input type="text" id="guestName" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="例：陳先生">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                </div>
+                                <div>
+                                    <label class="block text-gray-500 text-xs font-bold mb-1">聯絡電話</label>
+                                    <input type="tel" id="guestPhone" maxlength="10" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="09xxxxxxxx">
+
+
+
+
+
+
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pb-4">
+                            <button onclick="sendFinalToLine()" class="w-full bg-[#06c755] text-white font-bold py-4 rounded-lg hover:bg-[#05b54d] transition shadow-lg flex items-center justify-center text-xl animate-pulse"><i class="fab fa-line text-3xl mr-3"></i> 確認傳送預約</button>
+                            <p class="text-center text-gray-500 text-xs mt-2">*送出後將自動開啟 LINE 視窗</p>
+
+
+
+
+
+
+
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-4 border-top pt-3">
-                <small>&copy; 2025 Ruins Bar. All rights reserved.</small>
-            </div>
         </div>
-    </footer>
+    </div>
+    
+    <div id="copySuccessModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md">
+        <div class="bg-zinc-800 border-2 border-[#06c755] p-8 rounded-2xl shadow-[0_0_50px_rgba(6,199,85,0.3)] text-center max-w-sm mx-4">
+            <div class="w-20 h-20 bg-[#06c755] rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-check text-4xl text-white"></i></div>
+            <h3 class="text-2xl font-bold text-white mb-2">預約資料已複製！</h3>
+            <p class="text-gray-300 mb-8 text-sm">請點擊下方按鈕開啟 LINE，並在對話框中 <span class="text-[#06c755] font-bold">貼上</span> 剛剛複製的文字。</p>
+            <button onclick="goToLine()" class="w-full bg-[#06c755] hover:bg-[#05b54d] text-white font-bold py-4 rounded-xl text-lg transition shadow-lg">前往 LINE 貼上 <i class="fas fa-external-link-alt ml-2"></i></button>
+            <button onclick="closeCopyModal()" class="mt-4 text-gray-500 text-sm underline">關閉視窗</button>
+        </div>
+    </div>
+
+    <a href="javascript:void(0)" onclick="goToLine()" class="sticky-btn" aria-label="Line洽詢"><i class="fa-brands fa-line"></i></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <script>
-        // --- 價格設定表 ---
-        const PRICES = {
-            pure: { weekday: 3000, holiday: 4500 },     // 純場地
-            zhuazhou: { weekday: 5800, holiday: 6800 }, // 抓周
-            gender: { weekday: 5000, holiday: 6000 },   // 性別
-            proposal: { weekday: 5000, holiday: 6000 }, // 求婚
-            
-            extraHour: 1500,  // 加時費
-            extraChair: 50,   // 椅子費
-            cleaning: 1000    // 清潔費
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzk5VWXvgDJLoLW_eTYuXIxh_ziCrD9mbRsvtrK-Aulasx4eMt6QT9mzuq3HeQ8UGspxw/exec";
+        const LINE_ID = "@529ldsir"; 
+        const LINE_DEEP_LINK = "line://ti/p/" + LINE_ID;
+
+        let PLANS_DB = {};
+        let ADDONS_DB = [];
+        let CONFIG_DB = {};
+        
+        let currentPlan = null;
+        let selectedAddons = new Set();
+        let addonQuantities = {};
+        let bookingData = {};
+        let isWeekend = false;
+        let currentSlotMode = '';
+
+        window.onload = function() {
+            fetchData();
+            initCustomTimeSelects();
         };
 
-        // --- 初始化 ---
-        document.addEventListener('DOMContentLoaded', function() {
-            updateBaseInfo(); // 設定初始時數文字
-            calculateTotal(); // 計算初始金額
-        });
+        function fetchData() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            fetch(GAS_URL)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        PLANS_DB = data.plans;
+                        ADDONS_DB = data.addons;
+                        CONFIG_DB = data.config;
+                        document.getElementById('loadingOverlay').classList.add('hidden');
+                    } else { alert("資料讀取失敗"); }
+                })
+                .catch(err => { alert("連線錯誤"); document.getElementById('loadingOverlay').classList.add('hidden'); });
+        }
 
-        // --- 功能 1: 更新基本時數顯示 ---
-        function updateBaseInfo() {
-            const plan = document.getElementById('planType').value;
-            const baseHourSpan = document.getElementById('baseHourDisplay');
+        function showSubPlanModal(planIds) {
+            const container = document.getElementById('subPlanContainer');
+            container.innerHTML = '';
+            let hasValidPlan = false;
+            planIds.forEach(id => {
+                const plan = PLANS_DB[id];
+                if(plan) {
+                    hasValidPlan = true;
+                    const btn = document.createElement('div');
+                    btn.className = "w-full bg-zinc-800 border border-zinc-600 text-white p-5 rounded-lg cursor-pointer hover:bg-zinc-700 hover:border-neon-pink transition group shadow-lg";
+                    let featuresHtml = plan.features ? plan.features.map(f => `<li class="flex items-start"><i class="fas fa-check text-neon-blue mt-1 mr-2 text-xs"></i><span class="text-sm text-gray-300">${f}</span></li>`).join('') : '';
+                    btn.innerHTML = `<div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-600"><span class="font-bold text-xl group-hover:text-neon-pink transition">${plan.name}</span></div><ul class="space-y-1">${featuresHtml}</ul>`;
+                    btn.onclick = () => confirmPlan(plan.id);
+                    container.appendChild(btn);
+                }
+            });
+            if(hasValidPlan) document.getElementById('subPlanModal').classList.remove('hidden');
+        }
+
+        function handleCardClick(planId) { if(PLANS_DB[planId]) confirmPlan(planId); }
+
+        function confirmPlan(planId) {
+            currentPlan = PLANS_DB[planId];
+            document.getElementById('selectedPlanDisplay').innerText = currentPlan.name;
+            document.getElementById('subPlanModal').classList.add('hidden');
+            document.getElementById('bookingModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
             
-            // 判斷邏輯：純場地=3小時，其他=2小時
-            if (plan === 'pure') {
-                baseHourSpan.textContent = "3";
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('dateInput').value = "";
+            document.getElementById('basePriceDisplay').innerText = "";
+            document.getElementById('dayTypeLabel').innerText = "";
+
+            selectedAddons.clear();
+            addonQuantities = {};
+            currentSlotMode = '';
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
+
+            if (currentPlan.id === 'rental' || currentPlan.id === 'meeting') {
+                document.getElementById('btnAllDay').classList.remove('hidden');
             } else {
-                baseHourSpan.textContent = "2";
+                document.getElementById('btnAllDay').classList.add('hidden');
+            }
+            
+            const today = new Date();
+            const leadDays = (currentPlan.id === 'rental' || currentPlan.id === 'meeting') ? 2 : 14;
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() + leadDays);
+            document.getElementById("dateInput").min = minDate.toISOString().split('T')[0];
+        }
+
+        function closeModal() { document.getElementById('bookingModal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
+        function closeSubModal() { document.getElementById('subPlanModal').classList.add('hidden'); }
+
+        function selectSlot(mode) {
+            currentSlotMode = mode;
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
+            if(mode === 'lunch') document.getElementById('btnLunch').classList.add('active');
+            if(mode === 'dinner') document.getElementById('btnDinner').classList.add('active');
+            if(mode === 'allday') document.getElementById('btnAllDay').classList.add('active');
+            checkLogic();
+        }
+
+        function customTimeTrigger() {
+            currentSlotMode = 'custom';
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
+            updateEndTime();
+        }
+
+        function checkLogic() {
+            const dateVal = document.getElementById('dateInput').value;
+            if(!dateVal) return;
+            const d = new Date(dateVal);
+            const day = d.getDay();
+            isWeekend = (day === 6 || day === 0);
+            if (day === 5) {
+                if (currentSlotMode === 'dinner') isWeekend = true;
+                const startVal = document.getElementById('startTime').value;
+                if(currentSlotMode === 'custom' && startVal && parseInt(startVal.split(':')[0]) >= 16) isWeekend = true;
+            }
+            document.getElementById('dayTypeLabel').innerText = `${isWeekend?"假日":"平日"}計價`;
+        }
+
+        function handleCheck(e) {
+            e.preventDefault();
+            const dateVal = document.getElementById('dateInput').value;
+            if(!dateVal || !currentSlotMode) { alert("請選擇日期與時段"); return; }
+            
+            checkLogic();
+            let basePrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+            if(currentSlotMode === 'allday') {
+                if(currentPlan.id === 'rental') basePrice = isWeekend ? 36000 : 20000; 
+                else basePrice = basePrice * 2; 
+            }
+            document.getElementById('basePriceDisplay').innerText = basePrice.toLocaleString();
+            renderIncludedFeatures();
+            renderAddons();
+            document.getElementById('step2').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+        }
+
+        function renderIncludedFeatures() {
+            const list = document.getElementById('includedFeatures');
+            list.innerHTML = '';
+            const chairs = CONFIG_DB.global_chairs || 25;
+            list.innerHTML += `<li class="text-white font-bold">通用：竹節椅 ${chairs}張、200吋投影、音響麥克風</li>`;
+            if(currentPlan.includes && currentPlan.includes.length > 0) {
+                currentPlan.includes.forEach(incId => {
+                    const item = ADDONS_DB.find(a => a.id === incId);
+                    if(item) list.innerHTML += `<li class="text-neon-pink">${item.name}</li>`;
+                });
+            }
+        }
+
+        function renderAddons() {
+            const container = document.getElementById('addonList');
+            container.innerHTML = '';
+            
+            const planIncludes = new Set(currentPlan.includes || []);
+            
+            // 檢查是否有選了佈置 (方案內含 or 已選加購)
+            const isDecorActive = (planIncludes.has('decor_proposal') || planIncludes.has('decor_baby') || planIncludes.has('decor_wedding') || 
+                                   selectedAddons.has('decor_proposal') || selectedAddons.has('decor_baby') || selectedAddons.has('decor_wedding'));
+
+            ADDONS_DB.forEach(addon => {
+                // 如果是方案內含，我們現在還是可以顯示在加購區(作為加量)，除非是 toggle
+                // 但為了簡單，如果方案已含，就隱藏「單點」選項，除非它本身設計就是升級項
+                
+                // 計算方案內含數量
+                const includedQty = currentPlan.includes ? currentPlan.includes.filter(x => x === addon.id).length : 0;
+                
+                if(addon.logicTag) {
+                    if(addon.logicTag.startsWith('conflict:')) {
+                        const conflictId = addon.logicTag.split(':')[1];
+                        if(planIncludes.has(conflictId)) return;
+                    }
+                    if(addon.logicTag.startsWith('require:')) {
+                        const reqId = addon.logicTag.split(':')[1];
+                        if(!planIncludes.has(reqId)) return;
+                    }
+                    if(addon.logicTag.startsWith('hide_if:')) {
+                        const hideId = addon.logicTag.split(':')[1];
+                        if(planIncludes.has(hideId)) return;
+                    }
+                    // 新增：需要有佈置群組才顯示
+                    if(addon.logicTag.startsWith('require_group:decor') && !isDecorActive) return;
+                }
+
+                // 若是單次性(toggle)且方案已含，則不顯示
+                if(addon.type === 'toggle' && planIncludes.has(addon.id)) return;
+
+                const price = isWeekend ? addon.priceWeekend : addon.priceWeekday;
+                const div = document.createElement('div');
+                const includedText = includedQty > 0 ? `(原方案已含: ${includedQty})` : `(原方案已含: 0)`;
+                
+                if(addon.type === 'counter') {
+                    const qty = addonQuantities[addon.id] || 0;
+                    const activeClass = qty > 0 ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600';
+                    div.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center transition select-none`;
+                    div.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-white">${addon.name}</span>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-gray-500">$${price}/${addon.unit}</span>
+                                <span class="text-neon-pink">${includedText}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="counter-btn" onclick="updateCounter('${addon.id}', -1, ${addon.min}, ${addon.max})"><i class="fas fa-minus text-white text-xs"></i></div>
+                            <span class="text-white font-bold w-6 text-center">${qty}</span>
+                            <div class="counter-btn" onclick="updateCounter('${addon.id}', 1, ${addon.min}, ${addon.max})"><i class="fas fa-plus text-white text-xs"></i></div>
+                        </div>
+                    `;
+                } else {
+                    const isSel = selectedAddons.has(addon.id);
+                    const activeClass = isSel ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600 hover:bg-zinc-800';
+                    const iconClass = isSel ? 'opacity-100 bg-neon-blue text-black border-neon-blue' : 'opacity-30 border-zinc-500';
+                    div.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center cursor-pointer transition select-none`;
+                    div.onclick = () => toggleAddon(addon);
+                    div.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="check-icon w-5 h-5 rounded-full border ${iconClass} mr-3 flex items-center justify-center transition-all"><i class="fas fa-check text-[10px]"></i></div>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-bold text-white">${addon.name}</span>
+                                <span class="text-xs text-neon-pink">${includedText}</span>
+                            </div>
+                        </div>
+                        <span class="${isSel ? 'text-neon-pink' : 'text-gray-400'} text-sm font-bold">$${price}</span>
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function updateCounter(id, delta, min, max) {
+            let current = addonQuantities[id] || 0;
+            let next = current + delta;
+            if(min > 0) {
+                if(current === 0 && delta > 0) next = min;
+                else if(current === min && delta < 0) next = 0;
+                else if(next < min && next > 0) next = min;
+            }
+            if(next < 0) next = 0;
+            if(next > max) { alert(`此項目上限為 ${max}`); next = max; }
+            addonQuantities[id] = next;
+
+            // 若改變了 counter (例如選了佈置方案)，可能影響其他按鈕顯示 (dependency)
+            // 這裡簡單檢查一下如果是 group:decor 相關的 counter (雖然目前佈置都是 toggle)，若有 counter 影響 dependency 可在此呼叫 render
+            // 目前需求 counter 不影響 dependency (佈置都是 toggle)，所以單純 render 無妨
+            renderAddons();
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+        function toggleAddon(addon) {
+            const id = addon.id;
+            
+            // 互斥邏輯 (Mutex)
+            if(addon.logicTag && addon.logicTag.startsWith('mutex:')) {
+                const groupName = addon.logicTag.split(':')[1];
+                // 如果目前是選取狀態，直接取消即可
+                if(selectedAddons.has(id)) {
+                    selectedAddons.delete(id);
+                } else {
+                    // 若要選取，先移除同群組的其他選項
+                    ADDONS_DB.forEach(a => {
+                        if(a.logicTag === `mutex:${groupName}` && selectedAddons.has(a.id)) {
+                            selectedAddons.delete(a.id);
+                        }
+                    });
+                    selectedAddons.add(id);
+                }
+            } else {
+                // 一般切換
+                if(selectedAddons.has(id)) selectedAddons.delete(id);
+                else selectedAddons.add(id);
+            }
+            renderAddons(); // 重新渲染以更新依賴項 (如選了佈置出現名字背板)
+        }
+
+        function expandFinal() {
+            let basePrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
+            if(currentSlotMode === 'allday') {
+                if(currentPlan.id === 'rental') basePrice = isWeekend ? 36000 : 20000;
+                else basePrice = basePrice * 2;
+            }
+            let addonTotal = 0;
+            const invAddons = document.getElementById('invAddons');
+            invAddons.innerHTML = '';
+
+            for (const [id, qty] of Object.entries(addonQuantities)) {
+                if (qty > 0) {
+                    const item = ADDONS_DB.find(a => a.id === id);
+                    if(item) {
+                        const price = isWeekend ? item.priceWeekend : item.priceWeekday;
+                        const sub = price * qty;
+                        addonTotal += sub;
+                        invAddons.innerHTML += `<li class="flex justify-between border-b border-gray-200 pb-1"><span>${item.name} x ${qty}</span><span>$${sub.toLocaleString()}</span></li>`;
+                    }
+                }
             }
 
-            calculateTotal(); // 重新計算
+            selectedAddons.forEach(id => {
+                const item = ADDONS_DB.find(a => a.id === id);
+                if(item) {
+                    const price = isWeekend ? item.priceWeekend : item.priceWeekday;
+                    addonTotal += price;
+                    invAddons.innerHTML += `<li class="flex justify-between border-b border-gray-200 pb-1"><span>${item.name}</span><span>$${price.toLocaleString()}</span></li>`;
+                }
+            });
+
+            if(invAddons.innerHTML === '') invAddons.innerHTML = '<li class="text-gray-400 italic">無加購項目</li>';
+            const total = basePrice + addonTotal;
+            document.getElementById('invPlanName').innerText = currentPlan.name;
+            document.getElementById('invPlanPrice').innerText = `$${basePrice.toLocaleString()}`;
+            document.getElementById('invDate').innerText = `${document.getElementById('dateInput').value} ${isWeekend?"(假日)":"(平日)"}`;
+            let timeStr = "";
+            if(currentSlotMode === 'lunch') timeStr = "11:00-14:00";
+            else if(currentSlotMode === 'dinner') timeStr = "17:00-20:00";
+            else if(currentSlotMode === 'allday') timeStr = "09:00-21:00";
+            else {
+                const start = document.getElementById('startTime').value;
+                const end = document.getElementById('endTimeDisplay').value.split(' ')[0];
+                timeStr = `${start}-${end}`;
+            }
+            document.getElementById('invTimeRange').innerText = timeStr;
+            document.getElementById('invTotal').innerText = `NT$ ${total.toLocaleString()}`;
+            bookingData = { planName: currentPlan.name, date: document.getElementById('dateInput').value, time: timeStr, total: total, details: invAddons.innerHTML };
+            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // --- 功能 2: 加減按鈕控制 ---
-        function updateQty(elementId, change) {
-            const input = document.getElementById(elementId);
-            let val = parseInt(input.value) || 0;
-            val += change;
-            if (val < 0) val = 0; // 防止負數
-            input.value = val;
-            calculateTotal();
+        function sendFinalToLine() {
+            const name = document.getElementById('guestName').value;
+            const phone = document.getElementById('guestPhone').value;
+            if(!name || !phone) { alert("請填寫姓名與電話"); return; }
+            let detailsText = "";
+            for (const [id, qty] of Object.entries(addonQuantities)) {
+                if (qty > 0) {
+                    const item = ADDONS_DB.find(a => a.id === id);
+                    if(item) detailsText += `- ${item.name} x ${qty} ${item.unit}\n`;
+                }
+            }
+            selectedAddons.forEach(id => {
+                const item = ADDONS_DB.find(a => a.id === id);
+                if(item) detailsText += `- ${item.name}\n`;
+            });
+            if(detailsText === "") detailsText = "無\n";
+            let includesText = "";
+            if(currentPlan.includes && currentPlan.includes.length > 0) {
+                currentPlan.includes.forEach(incId => {
+                    const item = ADDONS_DB.find(a => a.id === incId);
+                    if(item) includesText += `- ${item.name} (內含)\n`;
+                });
+            }
+            let msg = `您好！我想預約 RUINS BAR 🥂\n\n👤 姓名：${name}\n📱 電話：${phone}\n------------------------\n📅 日期：${bookingData.date} ${isWeekend?"(假日)":"(平日)"}\n⏰ 時段：${bookingData.time}\n📋 方案：${bookingData.planName}\n\n✅ 方案內含：\n${includesText}\n➕ 加購/升級：\n${detailsText}\n💰 預估總價：NT$ ${bookingData.total.toLocaleString()}\n\n請協助確認檔期，謝謝！`;
+            copyToClipboard(msg).then(() => {
+                document.getElementById('copySuccessModal').classList.remove('hidden');
+                closeModal();
+            });
         }
 
-        // --- 功能 3: 核心金額計算 ---
-        function calculateTotal() {
-            // 1. 取得使用者選擇
-            const planType = document.getElementById('planType').value;
-            const isHoliday = document.getElementById('holiday').checked;
-            const dayKey = isHoliday ? 'holiday' : 'weekday';
-            
-            const extraHours = parseInt(document.getElementById('extraHours').value) || 0;
-            const addChairs = parseInt(document.getElementById('addChairs').value) || 0;
-            const needCleaning = document.getElementById('cleaningFee').checked;
-
-            // 2. 計算各細項
-            let basePrice = PRICES[planType][dayKey];         // 基本費
-            let hourPrice = extraHours * PRICES.extraHour;    // 加時費
-            let chairPrice = addChairs * PRICES.extraChair;   // 椅子費
-            let cleaningPrice = needCleaning ? PRICES.cleaning : 0; // 清潔費
-
-            // 3. 總加
-            let total = basePrice + hourPrice + chairPrice + cleaningPrice;
-
-            // 4. 更新畫面
-            // 使用 toLocaleString() 讓千分位加逗號 (3000 -> 3,000)
-            document.getElementById('totalPrice').innerText = total.toLocaleString();
+        function initCustomTimeSelects() {
+            const s = document.getElementById('startTime');
+            for (let i = 18; i <= 46; i++) { 
+                const hour = Math.floor(i / 2);
+                const min = (i % 2) === 0 ? '00' : '30';
+                const t = `${hour < 10 ? '0'+hour : hour}:${min}`;
+                s.add(new Option(t, t));
+            }
         }
+        function updateEndTime() {
+            const startVal = document.getElementById('startTime').value;
+            if(!startVal) return;
+            const [h, m] = startVal.split(':').map(Number);
+            let endH = h + 3;
+            let suffix = "";
+            if(endH >= 24) { endH -= 24; suffix = "(+1)"; }
+            const t = `${endH < 10 ? '0'+endH : endH}:${m===0?'00':m}${suffix}`;
+            document.getElementById('endTimeDisplay').value = t + " (3hr)";
+        }
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+            else {
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try { document.execCommand('copy'); } catch (err) {}
+                document.body.removeChild(textArea);
+                return Promise.resolve();
+            }
+        }
+        function goToLine() { window.location.href = LINE_DEEP_LINK; }
+        function closeCopyModal() { document.getElementById('copySuccessModal').classList.add('hidden'); }
     </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
 </body>
 </html>

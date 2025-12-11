@@ -38,7 +38,7 @@
         .addon-btn.selected { border-color: #00f3ff; background-color: rgba(0, 243, 255, 0.1); color: white; }
         .addon-btn.selected .check-icon { opacity: 1; background-color: #00f3ff; color: black; }
         .addon-btn.included { border-color: #06c755; background-color: rgba(6, 199, 85, 0.1); color: #88ffaa; cursor: default; }
-        .addon-btn.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(100%); display: none; } /* 用於隱藏不適用的加購 */
+        .addon-btn.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(100%); display: none; } 
         
         .plan-card { transition: all 0.3s ease; }
         .plan-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
@@ -62,6 +62,10 @@
         
         #loadingOverlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px); transition: opacity 0.5s; }
         .hidden { display: none !important; }
+
+        /* Menu Modal Styles */
+        .menu-item { border-bottom: 1px solid #333; padding: 8px 0; font-size: 0.9rem; color: #ccc; }
+        .menu-category { color: #d4af37; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 1rem; }
     </style>
 </head>
 <body class="font-sans antialiased selection:bg-neon-pink selection:text-white pb-24">
@@ -133,7 +137,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div onclick="showSubPlanModal(['baby', 'party'], '選擇派對類型')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                <div onclick="showSubPlanModal(['baby', 'gender', 'party'], '選擇派對類型')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
                     <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-birthday-cake mr-2 text-neon-pink"></i>各式派對方案</h4>
                     <p class="text-gray-500 text-xs">抓周 / 性別派對 / 慶生</p>
                 </div>
@@ -164,6 +168,50 @@
                     <h3 id="subPlanTitle" class="text-xl font-bold text-white mb-4 text-center"></h3>
                     <div id="subPlanContainer" class="space-y-4"></div>
                     <button onclick="closeSubModal()" class="mt-6 w-full text-gray-500 text-sm">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="menuModal" class="hidden fixed inset-0 z-[90] overflow-y-auto">
+        <div class="fixed inset-0 bg-black/90 transition-opacity backdrop-blur-sm" onclick="closeMenuModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative transform overflow-hidden rounded-2xl bg-zinc-900 text-left shadow-2xl w-full max-w-md border border-zinc-600">
+                <div class="p-6 max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-white"><i class="fas fa-utensils text-neon-pink mr-2"></i>派對餐點內容</h3>
+                        <button onclick="closeMenuModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+                    </div>
+                    
+                    <div class="text-sm text-gray-300 mb-2">※ 甜鹹點拼盤內容 (可任選口味)</div>
+                    <div class="bg-black p-4 rounded-lg border border-zinc-700">
+                        <div class="menu-category">【鹹點】</div>
+                        <div class="menu-item">咖哩餃 / 義式玉米烤 / 鮪魚派 / 蘋果派</div>
+                        <div class="menu-item">丹麥鮪魚 / 丹麥起司培根</div>
+                        <div class="menu-item">黃金乳酪球(素) / 丹麥煙雞(葷/素)</div>
+                        <div class="menu-item">丹麥香腸(葷/素) / 丹麥生菜沙拉(葷/素)</div>
+                        <div class="menu-item">小沙拉堡(葷/素) / 鮪魚餐包及小漢堡(葷/素)</div>
+                        <div class="menu-item">菠蘿QQ球(素) / 墨西哥雞肉捲</div>
+                        <div class="menu-item">法式披薩(葷/素) / 丹麥串燒(葷/素)</div>
+                        <div class="menu-item">燒賣及珍珠丸 / 上海湯包</div>
+                        <div class="menu-item">起酥香腸捲 / 港式蘿蔔糕</div>
+                        <div class="menu-item">丹麥培根鳳梨 / 麥克雞塊</div>
+
+                        <div class="menu-category">【甜點】</div>
+                        <div class="menu-item">桂圓蛋糕 / 檸檬蛋糕 / 布丁水果塔</div>
+                        <div class="menu-item">原味小蛋塔 / 蔓越莓小蛋塔 / 椰子塔</div>
+                        <div class="menu-item">什錦水果塔 / 乳酪一口酥 / 黑森林蛋糕</div>
+                        <div class="menu-item">乳酪蛋糕 / 提拉米蘇蛋糕 / 日式泡芙</div>
+                        <div class="menu-item">手工餅乾 / 日式麻糬</div>
+                        <div class="menu-item">船型杏仁核桃塔 / 蔓越莓泡芙 / 提拉米蘇杯</div>
+                    </div>
+
+                    <div class="text-sm text-gray-300 mt-4 mb-2">※ 炸物/滷味拼盤 (約10人份)</div>
+                    <div class="bg-black p-4 rounded-lg border border-zinc-700">
+                        <div class="menu-item text-neon-blue">獨立炸物 + 乾式滷味拼盤</div>
+                    </div>
+                    
+                    <button onclick="closeMenuModal()" class="mt-4 w-full bg-zinc-700 text-white font-bold py-2 rounded-lg hover:bg-zinc-600">關閉菜單</button>
                 </div>
             </div>
         </div>
@@ -340,7 +388,6 @@
         function handleCardClick(planId) { if(PLANS_DB[planId]) confirmPlan(planId); }
 
         function resetUI() {
-            // 清空先前的試算狀態
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('step3').classList.add('hidden');
             document.getElementById('dateInput').value = "";
@@ -357,8 +404,7 @@
         }
 
         function confirmPlan(planId) {
-            resetUI(); // 重置畫面
-            
+            resetUI(); 
             currentPlan = PLANS_DB[planId];
             document.getElementById('selectedPlanDisplay').innerText = currentPlan.name;
             document.getElementById('subPlanModal').classList.add('hidden');
@@ -380,9 +426,11 @@
 
         function closeModal() { document.getElementById('bookingModal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
         function closeSubModal() { document.getElementById('subPlanModal').classList.add('hidden'); }
+        
+        function openMenuModal() { document.getElementById('menuModal').classList.remove('hidden'); }
+        function closeMenuModal() { document.getElementById('menuModal').classList.add('hidden'); }
 
         function handleDateSelect() {
-            // 選完日期自動收鍵盤並跳到下一步
             document.getElementById('dateInput').blur(); 
             checkLogic();
             document.getElementById('timeSelectionArea').scrollIntoView({ behavior: 'smooth' });
@@ -392,7 +440,6 @@
             currentSlotMode = mode;
             document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
             
-            // 週五純場地不開放全日檢查
             if (mode === 'allday' && currentPlan.id === 'rental') {
                 const dateVal = document.getElementById('dateInput').value;
                 if(dateVal) {
@@ -425,10 +472,8 @@
             const d = new Date(dateVal);
             const day = d.getDay();
             
-            // 週五全日邏輯：鎖住全日選項
             if (day === 5 && currentPlan.id === 'rental') {
                  document.getElementById('alldayWarning').classList.remove('hidden');
-                 // 若已經選了全日，強制取消
                  if(currentSlotMode === 'allday') {
                      currentSlotMode = '';
                      document.getElementById('btnAllDay').classList.remove('active');
@@ -438,12 +483,9 @@
 
             isWeekend = (day === 6 || day === 0);
             if (day === 5) {
-                // 週五晚場算假日
                 if (currentSlotMode === 'dinner') isWeekend = true;
-                // 自訂時間超過 16:00 算假日
                 const startVal = document.getElementById('startTime').value;
                 if(currentSlotMode === 'custom' && startVal && parseInt(startVal.split(':')[0]) >= 16) isWeekend = true;
-                // 週五全日算假日 (若其他方案開放全日)
                 if (currentSlotMode === 'allday') isWeekend = true;
             }
             document.getElementById('dayTypeLabel').innerText = `${isWeekend?"假日":"平日"}計價`;
@@ -457,19 +499,12 @@
             checkLogic();
             let basePrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
             
-            // 全日價格邏輯
             if(currentSlotMode === 'allday') {
                 if(currentPlan.id === 'rental') {
-                    // 純場地全日 -> 去找 rental_allday 的價格
                     const alldayPlan = PLANS_DB['rental_allday'];
-                    if (alldayPlan) {
-                        basePrice = isWeekend ? alldayPlan.priceWeekend : alldayPlan.priceWeekday;
-                    } else {
-                        // 備案：若沒設定 rental_allday，則用原價 x 3 (避免出錯)
-                        basePrice = basePrice * 3; 
-                    }
+                    if (alldayPlan) basePrice = isWeekend ? alldayPlan.priceWeekend : alldayPlan.priceWeekday;
+                    else basePrice = basePrice * 3; 
                 } else {
-                    // 其他方案全日 = 價格 x 2
                     basePrice = basePrice * 2; 
                 }
             }
@@ -499,22 +534,32 @@
             container.innerHTML = '';
             
             const planIncludes = new Set(currentPlan.includes || []);
-            
-            // 檢查是否有選了佈置
             const isDecorActive = (planIncludes.has('decor_proposal') || planIncludes.has('decor_baby') || planIncludes.has('decor_wedding') || 
                                    selectedAddons.has('decor_proposal') || selectedAddons.has('decor_baby') || selectedAddons.has('decor_wedding'));
 
             ADDONS_DB.forEach(addon => {
-                // 純場地 (rental) 只能看見 "加時" 和 "加椅"
-                // 客製化方案 (custom) 可以看見所有
+                // 純場地只能看見: 加時, 桌子, 椅子
                 if(currentPlan.id === 'rental') {
-                    // 請確保 Sheet 裡的 ID 是 extra_hour 和 extra_chair，否則這裡會過濾掉
-                    if (addon.id !== 'extra_hour' && addon.id !== 'extra_chair') return;
+                    const allowed = ['extra_hour', 'extra_chair', 'extra_table'];
+                    if (!allowed.includes(addon.id)) return;
                 }
 
-                // 計算方案內含數量
-                const includedQty = currentPlan.includes ? currentPlan.includes.filter(x => x === addon.id).length : 0;
+                // 計算內含數量與顯示文字
+                let includedQty = currentPlan.includes ? currentPlan.includes.filter(x => x === addon.id).length : 0;
+                let includedText = includedQty > 0 ? `(原方案已含: ${includedQty})` : `(原方案已含: 0)`;
                 
+                // === [修正邏輯 1] 加時顯示 ===
+                if (addon.id === 'extra_hour') {
+                    // 抓周/性別是2小時, 其他是3小時
+                    const baseHrs = (currentPlan.id === 'baby' || currentPlan.id === 'gender') ? 2 : 3;
+                    includedText = `(原方案已含: ${baseHrs}小時)`;
+                }
+                
+                // === [修正邏輯 2] 椅子顯示 ===
+                if (addon.id === 'extra_chair') {
+                    includedText = `(原方案已含: 25張)`;
+                }
+
                 if(addon.logicTag) {
                     if(addon.logicTag.startsWith('conflict:')) {
                         const conflictId = addon.logicTag.split(':')[1];
@@ -535,15 +580,21 @@
 
                 const price = isWeekend ? addon.priceWeekend : addon.priceWeekday;
                 const div = document.createElement('div');
-                const includedText = includedQty > 0 ? `(原方案已含: ${includedQty})` : `(原方案已含: 0)`;
                 
                 if(addon.type === 'counter') {
                     const qty = addonQuantities[addon.id] || 0;
                     const activeClass = qty > 0 ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600';
+                    
+                    // 特殊：如果是餐點拼盤，增加「查看菜單」按鈕
+                    let extraHtml = '';
+                    if (addon.id === 'food_platter_1200') {
+                        extraHtml = `<button onclick="openMenuModal()" class="text-xs text-neon-blue underline ml-2"><i class="fas fa-book-open"></i> 查看菜單</button>`;
+                    }
+
                     div.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center transition select-none`;
                     div.innerHTML = `
                         <div class="flex flex-col">
-                            <span class="text-sm font-bold text-white">${addon.name}</span>
+                            <span class="text-sm font-bold text-white flex items-center">${addon.name} ${extraHtml}</span>
                             <div class="flex items-center gap-2 text-xs">
                                 <span class="text-gray-500">$${price}/${addon.unit}</span>
                                 <span class="text-neon-pink">${includedText}</span>
@@ -700,7 +751,6 @@
 
         function initCustomTimeSelects() {
             const s = document.getElementById('startTime');
-            // 修改自訂時間範圍：09:00 (18) 到 21:00 (42)
             for (let i = 18; i <= 42; i++) { 
                 const hour = Math.floor(i / 2);
                 const min = (i % 2) === 0 ? '00' : '30';

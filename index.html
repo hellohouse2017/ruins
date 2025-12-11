@@ -43,6 +43,7 @@
         .plan-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
         .plan-card:hover img { transform: scale(1.05); }
         .plan-card img { transition: transform 0.8s ease; }
+        .wedding-card:hover { border-color: #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
 
         .sticky-btn { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background-color: #06c755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 40; transition: all 0.3s ease; text-decoration: none; cursor: pointer; animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(6, 199, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0); } }
@@ -108,6 +109,34 @@
         <div class="max-w-7xl mx-auto">
             <h2 class="text-3xl font-bold text-white mb-10 text-center flex items-center justify-center"><i class="fas fa-list-ul text-neon-blue mr-3"></i> 選擇您的活動方案</h2>
             
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                <div onclick="handleCardClick('proposal')" class="plan-card cursor-pointer group relative rounded-2xl overflow-hidden border-2 border-neon-pink/50 shadow-[0_0_30px_rgba(255,0,85,0.15)] hover:border-neon-pink bg-zinc-900 flex flex-col">
+                    <div class="h-80 md:h-96 overflow-hidden relative w-full">
+                        <img src="images/proposal-cover.jpg" onerror="this.src='https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1000'" class="w-full h-full object-cover">
+                        <div class="absolute bottom-6 left-8 z-10">
+                            <div class="text-white font-bold text-2xl mb-1 flex items-center"><i class="fas fa-heart text-neon-pink mr-3"></i> 浪漫求婚包場</div>
+                        </div>
+                    </div>
+                    <div class="p-8 flex-grow flex flex-col justify-between">
+                        <p class="text-gray-300 mb-4 text-base leading-relaxed">包含氣球佈置、MerryMe燈條與求婚花束。</p>
+                        <div class="text-right text-neon-pink font-bold group-hover:translate-x-2 transition mt-4">查看方案 <i class="fas fa-arrow-right ml-1"></i></div>
+                    </div>
+                </div>
+
+                <div onclick="showSubPlanModal(['wedding_A', 'wedding_B'], '選擇婚禮方案')" class="plan-card wedding-card cursor-pointer group relative rounded-2xl overflow-hidden border-2 border-champagne/50 shadow-[0_0_30px_rgba(212,175,55,0.15)] bg-zinc-900 flex flex-col">
+                    <div class="h-80 md:h-96 overflow-hidden relative w-full">
+                        <img src="images/wedding-cover.jpg" onerror="this.src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1000'" class="w-full h-full object-cover">
+                        <div class="absolute bottom-6 left-8 z-10">
+                            <div class="text-white font-bold text-2xl mb-1 flex items-center"><i class="fas fa-ring text-champagne mr-3"></i> 婚禮派對 & 證婚</div>
+                        </div>
+                    </div>
+                    <div class="p-8 flex-grow flex flex-col justify-between">
+                        <p class="text-gray-300 mb-4 text-base leading-relaxed">提供 After Party 與 證婚儀式+派對 雙重選擇。</p>
+                        <div class="text-right text-champagne font-bold group-hover:translate-x-2 transition mt-4">查看詳細 <i class="fas fa-arrow-right ml-1"></i></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div onclick="handleCardClick('rental')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
                     <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-building mr-2 text-gray-400"></i>純場地租借</h4>
@@ -119,13 +148,13 @@
                     <p class="text-gray-500 text-xs">含桌椅、投影、茶水</p>
                 </div>
 
-                <div onclick="showSubPlanModal(['baby', 'gender', 'party', 'proposal', 'wedding_A', 'wedding_B'], '選擇派對類型')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
+                <div onclick="showSubPlanModal(['baby', 'gender', 'party'], '選擇派對類型')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
                     <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-birthday-cake mr-2 text-neon-pink"></i>各式派對方案</h4>
-                    <p class="text-gray-500 text-xs">抓周 / 慶生 / 求婚 / 婚禮</p>
+                    <p class="text-gray-500 text-xs">抓周 / 性別派對 / 慶生</p>
                 </div>
                 
                 <div onclick="handleCardClick('custom')" class="plan-card bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden cursor-pointer p-4 hover:border-neon-blue">
-                    <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-magic mr-2 text-neon-blue"></i>客製化專屬方案</h4>
+                    <h4 class="text-lg font-bold text-white mb-1"><i class="fas fa-magic mr-2 text-neon-blue"></i>訂製客製化專屬方案</h4>
                     <p class="text-gray-500 text-xs">依場地基本費，自由加購</p>
                 </div>
             </div>
@@ -166,10 +195,42 @@
                             <div class="menu-checkbox-item"><input type="checkbox" id="f4" value="蘋果派"><label for="f4">蘋果派</label></div>
                             <div class="menu-checkbox-item"><input type="checkbox" id="f5" value="丹麥鮪魚"><label for="f5">丹麥鮪魚</label></div>
                             <div class="menu-checkbox-item"><input type="checkbox" id="f6" value="丹麥起司培根"><label for="f6">丹麥起司培根</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f7" value="黃金乳酪球(素)"><label for="f7">黃金乳酪球(素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f8" value="丹麥煙雞(葷/素)"><label for="f8">丹麥煙雞(葷/素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f9" value="丹麥香腸(葷/素)"><label for="f9">丹麥香腸(葷/素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f10" value="丹麥生菜沙拉(葷/素)"><label for="f10">丹麥生菜沙拉(葷/素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f11" value="小沙拉堡(葷/素)"><label for="f11">小沙拉堡(葷/素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f12" value="鮪魚餐包及小漢堡"><label for="f12">鮪魚餐包及小漢堡</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f13" value="菠蘿QQ球(素)"><label for="f13">菠蘿QQ球(素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f14" value="墨西哥雞肉捲"><label for="f14">墨西哥雞肉捲</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f15" value="法式披薩(葷/素)"><label for="f15">法式披薩(葷/素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f16" value="丹麥串燒(葷/素)"><label for="f16">丹麥串燒(葷/素)</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f17" value="燒賣及珍珠丸"><label for="f17">燒賣及珍珠丸</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f18" value="上海湯包"><label for="f18">上海湯包</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f19" value="起酥香腸捲"><label for="f19">起酥香腸捲</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f20" value="港式蘿蔔糕"><label for="f20">港式蘿蔔糕</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f21" value="丹麥培根鳳梨"><label for="f21">丹麥培根鳳梨</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="f22" value="麥克雞塊"><label for="f22">麥克雞塊</label></div>
+
                             <div class="menu-category">【甜點區 (每選一項代表加購一盤)】</div>
                             <div class="menu-checkbox-item"><input type="checkbox" id="s1" value="桂圓蛋糕"><label for="s1">桂圓蛋糕</label></div>
                             <div class="menu-checkbox-item"><input type="checkbox" id="s2" value="檸檬蛋糕"><label for="s2">檸檬蛋糕</label></div>
-                            </form>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s3" value="布丁水果塔"><label for="s3">布丁水果塔</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s4" value="原味小蛋塔"><label for="s4">原味小蛋塔</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s5" value="蔓越莓小蛋塔"><label for="s5">蔓越莓小蛋塔</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s6" value="椰子塔"><label for="s6">椰子塔</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s7" value="什錦水果塔"><label for="s7">什錦水果塔</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s8" value="乳酪一口酥"><label for="s8">乳酪一口酥</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s9" value="黑森林蛋糕"><label for="s9">黑森林蛋糕</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s10" value="乳酪蛋糕"><label for="s10">乳酪蛋糕</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s11" value="提拉米蘇蛋糕"><label for="s11">提拉米蘇蛋糕</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s12" value="日式泡芙"><label for="s12">日式泡芙</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s13" value="手工餅乾"><label for="s13">手工餅乾</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s14" value="日式麻糬"><label for="s14">日式麻糬</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s15" value="船型杏仁核桃塔"><label for="s15">船型杏仁核桃塔</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s16" value="蔓越莓泡芙"><label for="s16">蔓越莓泡芙</label></div>
+                            <div class="menu-checkbox-item"><input type="checkbox" id="s17" value="提拉米蘇杯"><label for="s17">提拉米蘇杯</label></div>
+                        </form>
                     </div>
 
                     <div id="drinkMenuContent" class="hidden">
@@ -397,6 +458,7 @@
                 document.getElementById('btnAllDay').classList.add('hidden');
             }
             
+            // === [日期房呆邏輯] ===
             const today = new Date();
             let leadDays = 14; // Default for Party/Custom
             

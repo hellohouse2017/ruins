@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ruins Bar 高雄廢墟場地租借 | 預約系統</title>
 
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
@@ -29,35 +28,45 @@
             }
         }
     </script>
+
     <style>
         body { background-color: #121212; color: #e0e0e0; }
+        
+        /* 日期選擇器樣式 */
         input[type="date"] { position: relative; font-size: 1.1rem; }
         input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         
+        /* 加購按鈕樣式 */
         .addon-btn.selected { border-color: #00f3ff; background-color: rgba(0, 243, 255, 0.1); color: white; }
         .addon-btn.selected .check-icon { opacity: 1; background-color: #00f3ff; color: black; }
         .addon-btn.included { border-color: #06c755; background-color: rgba(6, 199, 85, 0.1); color: #88ffaa; cursor: default; }
         
+        /* 卡片互動效果 */
         .plan-card { transition: all 0.3s ease; }
         .plan-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
         .plan-card:hover img { transform: scale(1.05); }
         .plan-card img { transition: transform 0.8s ease; }
         .wedding-card:hover { border-color: #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
 
+        /* Line 懸浮按鈕 */
         .sticky-btn { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background-color: #06c755; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 40; transition: all 0.3s ease; text-decoration: none; cursor: pointer; animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(6, 199, 85, 0); } 100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0); } }
         
+        /* 隱藏捲軸但保留功能 */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         
+        /* 計數器按鈕 */
         .counter-btn { width: 30px; height: 30px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .counter-btn:hover { background: #555; }
 
+        /* 時段選擇按鈕 */
         .slot-btn { background-color: #1a1a1a; border: 1px solid #444; color: #888; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .slot-btn:hover { border-color: #666; color: white; }
         .slot-btn.active { background-color: rgba(0, 243, 255, 0.15); border-color: #00f3ff; color: #00f3ff; font-weight: bold; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
         .slot-btn span { font-size: 0.75rem; font-weight: normal; opacity: 0.8; }
         
+        /* 讀取畫面 */
         #loadingOverlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px); transition: opacity 0.5s; }
         .hidden { display: none !important; }
     </style>
@@ -69,7 +78,6 @@
         <p class="text-white text-lg font-bold">正在讀取最新方案...</p>
         <p class="text-gray-400 text-sm mt-2">Connecting to Google Database</p>
     </div>
-
 
     <nav class="fixed w-full z-50 bg-ruin-dark/95 backdrop-blur-md border-b border-white/10 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -99,10 +107,6 @@
             </a>
         </div>
     </div>
-
-
-
-
 
     <section id="plans-section" class="py-20 px-4 bg-ruin-dark relative z-30">
         <div class="max-w-7xl mx-auto">
@@ -166,57 +170,6 @@
                     <div id="subPlanContainer" class="space-y-4"></div>
                     <button onclick="closeSubModal()" class="mt-6 w-full text-gray-500 text-sm">取消</button>
                 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             </div>
         </div>
     </div>
@@ -240,18 +193,6 @@
                                 <label class="block text-neon-blue text-sm font-bold mb-1">1. 選擇預計日期</label>
                                 <div class="relative"><input type="date" id="dateInput" onchange="checkLogic()" onclick="this.showPicker()" required class="w-full bg-black border border-zinc-700 text-white rounded-lg p-3 focus:border-neon-blue focus:outline-none cursor-pointer"></div>
                                 <p id="dayTypeLabel" class="text-xs text-gray-500 mt-1 text-right"></p>
-
-
-
-
-
-
-
-
-
-
-
-
                             </div>
                             <div>
                                 <label class="block text-neon-blue text-sm font-bold mb-1">2. 選擇時段</label>
@@ -278,19 +219,6 @@
                             <div class="mt-3 border-t border-zinc-600 pt-3">
                                 <p class="text-xs text-gray-400 mb-1">✅ 方案內含 (自動選取/折抵)：</p>
                                 <ul id="includedFeatures" class="text-sm text-gray-300 list-disc list-inside space-y-1"></ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
                             </div>
                         </div>
                         
@@ -317,57 +245,20 @@
                                 <ul id="invAddons" class="text-sm space-y-2"></ul>
                             </div>
 
-
                             <div class="flex justify-between items-end border-t border-gray-300 pt-4 mb-6">
                                 <span class="text-gray-600 font-bold text-lg">預估總價</span>
                                 <span id="invTotal" class="text-3xl font-bold text-neon-pink"></span>
                             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                             <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-4">
                                 <h5 class="font-bold text-gray-700 mb-3 flex items-center"><i class="fas fa-user-edit mr-2"></i> 預約人資料</h5>
                                 <div class="mb-3">
                                     <label class="block text-gray-500 text-xs font-bold mb-1">您的姓名</label>
                                     <input type="text" id="guestName" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="例：陳先生">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                 </div>
                                 <div>
                                     <label class="block text-gray-500 text-xs font-bold mb-1">聯絡電話</label>
                                     <input type="tel" id="guestPhone" maxlength="10" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="09xxxxxxxx">
-
-
-
-
-
-
-
-
                                 </div>
                             </div>
                         </div>
@@ -375,13 +266,6 @@
                         <div class="mt-6 pb-4">
                             <button onclick="sendFinalToLine()" class="w-full bg-[#06c755] text-white font-bold py-4 rounded-lg hover:bg-[#05b54d] transition shadow-lg flex items-center justify-center text-xl animate-pulse"><i class="fab fa-line text-3xl mr-3"></i> 確認傳送預約</button>
                             <p class="text-center text-gray-500 text-xs mt-2">*送出後將自動開啟 LINE 視窗</p>
-
-
-
-
-
-
-
                         </div>
                     </div>
                 </div>
@@ -400,34 +284,6 @@
     </div>
 
     <a href="javascript:void(0)" onclick="goToLine()" class="sticky-btn" aria-label="Line洽詢"><i class="fa-brands fa-line"></i></a>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbzk5VWXvgDJLoLW_eTYuXIxh_ziCrD9mbRsvtrK-Aulasx4eMt6QT9mzuq3HeQ8UGspxw/exec";
@@ -592,7 +448,6 @@
 
             ADDONS_DB.forEach(addon => {
                 // 如果是方案內含，我們現在還是可以顯示在加購區(作為加量)，除非是 toggle
-                // 但為了簡單，如果方案已含，就隱藏「單點」選項，除非它本身設計就是升級項
                 
                 // 計算方案內含數量
                 const includedQty = currentPlan.includes ? currentPlan.includes.filter(x => x === addon.id).length : 0;
@@ -672,22 +527,8 @@
             if(next > max) { alert(`此項目上限為 ${max}`); next = max; }
             addonQuantities[id] = next;
 
-            // 若改變了 counter (例如選了佈置方案)，可能影響其他按鈕顯示 (dependency)
-            // 這裡簡單檢查一下如果是 group:decor 相關的 counter (雖然目前佈置都是 toggle)，若有 counter 影響 dependency 可在此呼叫 render
-            // 目前需求 counter 不影響 dependency (佈置都是 toggle)，所以單純 render 無妨
+            // 若改變了 counter，重新渲染以更新依賴項
             renderAddons();
-
-
-
-
-
-
-
-
-
-
-
-
         }
 
         function toggleAddon(addon) {
@@ -696,11 +537,9 @@
             // 互斥邏輯 (Mutex)
             if(addon.logicTag && addon.logicTag.startsWith('mutex:')) {
                 const groupName = addon.logicTag.split(':')[1];
-                // 如果目前是選取狀態，直接取消即可
                 if(selectedAddons.has(id)) {
                     selectedAddons.delete(id);
                 } else {
-                    // 若要選取，先移除同群組的其他選項
                     ADDONS_DB.forEach(a => {
                         if(a.logicTag === `mutex:${groupName}` && selectedAddons.has(a.id)) {
                             selectedAddons.delete(a.id);
@@ -709,11 +548,10 @@
                     selectedAddons.add(id);
                 }
             } else {
-                // 一般切換
                 if(selectedAddons.has(id)) selectedAddons.delete(id);
                 else selectedAddons.add(id);
             }
-            renderAddons(); // 重新渲染以更新依賴項 (如選了佈置出現名字背板)
+            renderAddons(); 
         }
 
         function expandFinal() {
@@ -834,7 +672,5 @@
         function goToLine() { window.location.href = LINE_DEEP_LINK; }
         function closeCopyModal() { document.getElementById('copySuccessModal').classList.add('hidden'); }
     </script>
-
-
 </body>
 </html>

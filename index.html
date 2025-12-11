@@ -31,7 +31,6 @@
 
     <style>
         body { background-color: #121212; color: #e0e0e0; }
-        
         input[type="date"] { position: relative; font-size: 1.1rem; }
         input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         
@@ -63,9 +62,12 @@
         #loadingOverlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px); transition: opacity 0.5s; }
         .hidden { display: none !important; }
 
-        /* Menu Modal Styles */
-        .menu-item { border-bottom: 1px solid #333; padding: 8px 0; font-size: 0.9rem; color: #ccc; }
-        .menu-category { color: #d4af37; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 1rem; }
+        /* Menu Styles */
+        .menu-category { color: #d4af37; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 1rem; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        .menu-checkbox-item { display: flex; align-items: center; margin-bottom: 8px; padding: 5px; border-radius: 5px; transition: background 0.2s; }
+        .menu-checkbox-item:hover { background-color: #333; }
+        .menu-checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #00f3ff; margin-right: 10px; cursor: pointer; }
+        .menu-checkbox-item label { cursor: pointer; font-size: 0.95rem; color: #ddd; flex-grow: 1; }
     </style>
 </head>
 <body class="font-sans antialiased selection:bg-neon-pink selection:text-white pb-24">
@@ -176,42 +178,63 @@
     <div id="menuModal" class="hidden fixed inset-0 z-[90] overflow-y-auto">
         <div class="fixed inset-0 bg-black/90 transition-opacity backdrop-blur-sm" onclick="closeMenuModal()"></div>
         <div class="flex min-h-full items-center justify-center p-4">
-            <div class="relative transform overflow-hidden rounded-2xl bg-zinc-900 text-left shadow-2xl w-full max-w-md border border-zinc-600">
+            <div class="relative transform overflow-hidden rounded-2xl bg-zinc-900 text-left shadow-2xl w-full max-w-md border border-neon-blue/50">
                 <div class="p-6 max-h-[80vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-white"><i class="fas fa-utensils text-neon-pink mr-2"></i>派對餐點內容</h3>
+                        <h3 class="text-xl font-bold text-white"><i class="fas fa-utensils text-neon-pink mr-2"></i>選擇拼盤口味</h3>
                         <button onclick="closeMenuModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
                     </div>
                     
-                    <div class="text-sm text-gray-300 mb-2">※ 甜鹹點拼盤內容 (可任選口味)</div>
-                    <div class="bg-black p-4 rounded-lg border border-zinc-700">
-                        <div class="menu-category">【鹹點】</div>
-                        <div class="menu-item">咖哩餃 / 義式玉米烤 / 鮪魚派 / 蘋果派</div>
-                        <div class="menu-item">丹麥鮪魚 / 丹麥起司培根</div>
-                        <div class="menu-item">黃金乳酪球(素) / 丹麥煙雞(葷/素)</div>
-                        <div class="menu-item">丹麥香腸(葷/素) / 丹麥生菜沙拉(葷/素)</div>
-                        <div class="menu-item">小沙拉堡(葷/素) / 鮪魚餐包及小漢堡(葷/素)</div>
-                        <div class="menu-item">菠蘿QQ球(素) / 墨西哥雞肉捲</div>
-                        <div class="menu-item">法式披薩(葷/素) / 丹麥串燒(葷/素)</div>
-                        <div class="menu-item">燒賣及珍珠丸 / 上海湯包</div>
-                        <div class="menu-item">起酥香腸捲 / 港式蘿蔔糕</div>
-                        <div class="menu-item">丹麥培根鳳梨 / 麥克雞塊</div>
-
-                        <div class="menu-category">【甜點】</div>
-                        <div class="menu-item">桂圓蛋糕 / 檸檬蛋糕 / 布丁水果塔</div>
-                        <div class="menu-item">原味小蛋塔 / 蔓越莓小蛋塔 / 椰子塔</div>
-                        <div class="menu-item">什錦水果塔 / 乳酪一口酥 / 黑森林蛋糕</div>
-                        <div class="menu-item">乳酪蛋糕 / 提拉米蘇蛋糕 / 日式泡芙</div>
-                        <div class="menu-item">手工餅乾 / 日式麻糬</div>
-                        <div class="menu-item">船型杏仁核桃塔 / 蔓越莓泡芙 / 提拉米蘇杯</div>
+                    <div class="text-xs text-gray-300 mb-4 bg-zinc-800 p-3 rounded">
+                        <i class="fas fa-info-circle mr-1"></i> 請勾選您想放入拼盤的品項，我們將為您客製組合。
                     </div>
 
-                    <div class="text-sm text-gray-300 mt-4 mb-2">※ 炸物/滷味拼盤 (約10人份)</div>
-                    <div class="bg-black p-4 rounded-lg border border-zinc-700">
-                        <div class="menu-item text-neon-blue">獨立炸物 + 乾式滷味拼盤</div>
-                    </div>
+                    <form id="foodMenuForm">
+                        <div class="menu-category">【鹹點區】</div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f1" value="咖哩餃"><label for="f1">咖哩餃</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f2" value="義式玉米烤"><label for="f2">義式玉米烤</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f3" value="鮪魚派"><label for="f3">鮪魚派</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f4" value="蘋果派"><label for="f4">蘋果派</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f5" value="丹麥鮪魚"><label for="f5">丹麥鮪魚</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f6" value="丹麥起司培根"><label for="f6">丹麥起司培根</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f7" value="黃金乳酪球(素)"><label for="f7">黃金乳酪球(素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f8" value="丹麥煙雞(葷/素)"><label for="f8">丹麥煙雞(葷/素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f9" value="丹麥香腸(葷/素)"><label for="f9">丹麥香腸(葷/素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f10" value="丹麥生菜沙拉(葷/素)"><label for="f10">丹麥生菜沙拉(葷/素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f11" value="小沙拉堡(葷/素)"><label for="f11">小沙拉堡(葷/素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f12" value="鮪魚餐包及小漢堡"><label for="f12">鮪魚餐包及小漢堡</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f13" value="菠蘿QQ球(素)"><label for="f13">菠蘿QQ球(素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f14" value="墨西哥雞肉捲"><label for="f14">墨西哥雞肉捲</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f15" value="法式披薩(葷/素)"><label for="f15">法式披薩(葷/素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f16" value="丹麥串燒(葷/素)"><label for="f16">丹麥串燒(葷/素)</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f17" value="燒賣及珍珠丸"><label for="f17">燒賣及珍珠丸</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f18" value="上海湯包"><label for="f18">上海湯包</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f19" value="起酥香腸捲"><label for="f19">起酥香腸捲</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f20" value="港式蘿蔔糕"><label for="f20">港式蘿蔔糕</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f21" value="丹麥培根鳳梨"><label for="f21">丹麥培根鳳梨</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="f22" value="麥克雞塊"><label for="f22">麥克雞塊</label></div>
+
+                        <div class="menu-category">【甜點區】</div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s1" value="桂圓蛋糕"><label for="s1">桂圓蛋糕</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s2" value="檸檬蛋糕"><label for="s2">檸檬蛋糕</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s3" value="布丁水果塔"><label for="s3">布丁水果塔</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s4" value="原味小蛋塔"><label for="s4">原味小蛋塔</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s5" value="蔓越莓小蛋塔"><label for="s5">蔓越莓小蛋塔</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s6" value="椰子塔"><label for="s6">椰子塔</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s7" value="什錦水果塔"><label for="s7">什錦水果塔</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s8" value="乳酪一口酥"><label for="s8">乳酪一口酥</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s9" value="黑森林蛋糕"><label for="s9">黑森林蛋糕</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s10" value="乳酪蛋糕"><label for="s10">乳酪蛋糕</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s11" value="提拉米蘇蛋糕"><label for="s11">提拉米蘇蛋糕</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s12" value="日式泡芙"><label for="s12">日式泡芙</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s13" value="手工餅乾"><label for="s13">手工餅乾</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s14" value="日式麻糬"><label for="s14">日式麻糬</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s15" value="船型杏仁核桃塔"><label for="s15">船型杏仁核桃塔</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s16" value="蔓越莓泡芙"><label for="s16">蔓越莓泡芙</label></div>
+                        <div class="menu-checkbox-item"><input type="checkbox" id="s17" value="提拉米蘇杯"><label for="s17">提拉米蘇杯</label></div>
+                    </form>
                     
-                    <button onclick="closeMenuModal()" class="mt-4 w-full bg-zinc-700 text-white font-bold py-2 rounded-lg hover:bg-zinc-600">關閉菜單</button>
+                    <button onclick="closeMenuModal()" class="mt-6 w-full bg-neon-blue text-black font-bold py-3 rounded-lg hover:bg-[#00d0dd] shadow-lg">確認選擇並返回</button>
                 </div>
             </div>
         </div>
@@ -401,6 +424,8 @@
             document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('alldayWarning').classList.add('hidden');
             document.getElementById('btnAllDay').classList.remove('disabled');
+            // Reset food checkboxes
+            document.querySelectorAll('#foodMenuForm input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
         function confirmPlan(planId) {
@@ -538,24 +563,19 @@
                                    selectedAddons.has('decor_proposal') || selectedAddons.has('decor_baby') || selectedAddons.has('decor_wedding'));
 
             ADDONS_DB.forEach(addon => {
-                // 純場地只能看見: 加時, 桌子, 椅子
                 if(currentPlan.id === 'rental') {
                     const allowed = ['extra_hour', 'extra_chair', 'extra_table'];
                     if (!allowed.includes(addon.id)) return;
                 }
 
-                // 計算內含數量與顯示文字
                 let includedQty = currentPlan.includes ? currentPlan.includes.filter(x => x === addon.id).length : 0;
                 let includedText = includedQty > 0 ? `(原方案已含: ${includedQty})` : `(原方案已含: 0)`;
                 
-                // === [修正邏輯 1] 加時顯示 ===
                 if (addon.id === 'extra_hour') {
-                    // 抓周/性別是2小時, 其他是3小時
                     const baseHrs = (currentPlan.id === 'baby' || currentPlan.id === 'gender') ? 2 : 3;
                     includedText = `(原方案已含: ${baseHrs}小時)`;
                 }
                 
-                // === [修正邏輯 2] 椅子顯示 ===
                 if (addon.id === 'extra_chair') {
                     includedText = `(原方案已含: 25張)`;
                 }
@@ -585,10 +605,9 @@
                     const qty = addonQuantities[addon.id] || 0;
                     const activeClass = qty > 0 ? 'border-neon-blue bg-zinc-800' : 'border-zinc-600';
                     
-                    // 特殊：如果是餐點拼盤，增加「查看菜單」按鈕
                     let extraHtml = '';
                     if (addon.id === 'food_platter_1200') {
-                        extraHtml = `<button onclick="openMenuModal()" class="text-xs text-neon-blue underline ml-2"><i class="fas fa-book-open"></i> 查看菜單</button>`;
+                        extraHtml = `<button onclick="openMenuModal()" class="text-xs text-neon-blue underline ml-2"><i class="fas fa-utensils"></i> 選擇口味</button>`;
                     }
 
                     div.className = `addon-btn bg-black border ${activeClass} rounded-lg p-3 flex justify-between items-center transition select-none`;
@@ -638,6 +657,11 @@
             if(next < 0) next = 0;
             if(next > max) { alert(`此項目上限為 ${max}`); next = max; }
             addonQuantities[id] = next;
+            
+            // Auto open menu modal if selecting platter
+            if (id === 'food_platter_1200' && next > 0 && delta > 0) {
+                 openMenuModal();
+            }
             renderAddons();
         }
 
@@ -662,6 +686,14 @@
             renderAddons(); 
         }
 
+        function getSelectedFood() {
+            const checkboxes = document.querySelectorAll('#foodMenuForm input[type="checkbox"]:checked');
+            if (checkboxes.length === 0) return "";
+            let selected = [];
+            checkboxes.forEach(cb => selected.push(cb.value));
+            return selected.join(", ");
+        }
+
         function expandFinal() {
             let basePrice = isWeekend ? currentPlan.priceWeekend : currentPlan.priceWeekday;
             if(currentSlotMode === 'allday') {
@@ -684,7 +716,15 @@
                         const price = isWeekend ? item.priceWeekend : item.priceWeekday;
                         const sub = price * qty;
                         addonTotal += sub;
-                        invAddons.innerHTML += `<li class="flex justify-between border-b border-gray-200 pb-1"><span>${item.name} x ${qty}</span><span>$${sub.toLocaleString()}</span></li>`;
+                        
+                        // Show food selection in review if applicable
+                        let note = "";
+                        if (id === 'food_platter_1200') {
+                            const foods = getSelectedFood();
+                            if(foods) note = `<br><span class="text-xs text-gray-400">口味: ${foods}</span>`;
+                        }
+
+                        invAddons.innerHTML += `<li class="flex flex-col border-b border-gray-200 pb-1"><div class="flex justify-between"><span>${item.name} x ${qty}</span><span>$${sub.toLocaleString()}</span></div>${note}</li>`;
                     }
                 }
             }
@@ -724,17 +764,27 @@
             const phone = document.getElementById('guestPhone').value;
             if(!name || !phone) { alert("請填寫姓名與電話"); return; }
             let detailsText = "";
+            
+            // Gather quantity items
             for (const [id, qty] of Object.entries(addonQuantities)) {
                 if (qty > 0) {
                     const item = ADDONS_DB.find(a => a.id === id);
-                    if(item) detailsText += `- ${item.name} x ${qty} ${item.unit}\n`;
+                    if(item) {
+                        detailsText += `- ${item.name} x ${qty} ${item.unit}\n`;
+                        if (id === 'food_platter_1200') {
+                            const foods = getSelectedFood();
+                            if(foods) detailsText += `  (口味: ${foods})\n`;
+                        }
+                    }
                 }
             }
+            // Gather toggle items
             selectedAddons.forEach(id => {
                 const item = ADDONS_DB.find(a => a.id === id);
                 if(item) detailsText += `- ${item.name}\n`;
             });
             if(detailsText === "") detailsText = "無\n";
+            
             let includesText = "";
             if(currentPlan.includes && currentPlan.includes.length > 0) {
                 currentPlan.includes.forEach(incId => {

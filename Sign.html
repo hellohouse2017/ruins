@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>場地租賃合約簽署 | 廢墟 BAR</title>
+    <meta name="robots" content="noindex, nofollow"> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh_tw.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <style>
+        :root { --c-dark: #1a1a1a; --c-gold: #c5a47e; --c-gold-light: #f4f1ea; --c-red: #A94442; --c-gray: #7F8C8D; --c-white: #FFFFFF; --font-serif: 'Noto Serif TC', serif; --font-sans: 'Noto Sans TC', sans-serif; --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08); }
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        body { margin: 0; font-family: var(--font-sans); background-color: #eee; color: var(--c-dark); line-height: 1.7; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; overscroll-behavior: none; }
+
+        .navbar { background: var(--c-dark); height: 60px; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; width: 100%; z-index: 999; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-logo { color: var(--c-gold); font-family: var(--font-serif); font-size: 1.2rem; font-weight: 600; letter-spacing: 2px; text-decoration: none; }
+
+        .header-section { margin-top: 60px; padding: 40px 20px; text-align: center; background: #222; color: white; background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; }
+        .header-section h1 { margin: 0; font-family: var(--font-serif); font-size: 1.8rem; letter-spacing: 3px; font-weight: 500; }
+        .header-section p { margin: 5px 0 0; font-size: 0.8rem; color: var(--c-gold); text-transform: uppercase; letter-spacing: 2px; }
+
+        .container { width: 95%; max-width: 800px; margin: -30px auto 40px; position: relative; z-index: 10; }
+
+        #capture-area { background-color: var(--c-white); padding: 50px; border-radius: 4px; box-shadow: var(--shadow-card); border-top: 6px solid var(--c-gold); position: relative; }
+        #capture-area::before { content: "RUINS BAR"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 5rem; font-weight: bold; color: rgba(0,0,0,0.03); pointer-events: none; white-space: nowrap; font-family: sans-serif; }
+
+        .contract-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #EEE; padding-bottom: 20px; }
+        .contract-header h2 { margin: 0; font-family: var(--font-serif); color: var(--c-dark); font-size: 1.6rem; letter-spacing: 1px; }
+        .contract-header span { display: block; margin-top: 5px; color: var(--c-gray); font-size: 0.8rem; letter-spacing: 1px; }
+
+        /* Form Grid System */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 5px; }
+        .col-full { grid-column: 1 / -1; } 
+        .col-third { grid-template-columns: 1fr 1fr 1fr; }
+
+        .form-label { display: block; font-size: 0.8rem; color: var(--c-gray); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input { width: 100%; padding: 10px; font-size: 0.95rem; color: var(--c-dark); font-family: var(--font-serif); border: 1px solid #DDD; border-radius: 4px; background: #FAFAFA; transition: 0.3s; }
+        .form-input:focus { outline: none; border-color: var(--c-gold); background: #FFF; box-shadow: 0 0 0 3px rgba(197, 164, 126, 0.1); }
+        .form-input.readonly { background: #F9F5EB; border-color: #E0D6C3; color: #8A7A5B; font-weight: bold; cursor: default; }
+
+        .inline-input { border: none; border-bottom: 1px solid #888; background: transparent; padding: 0 5px; font-family: var(--font-serif); font-weight: bold; color: var(--c-dark); text-align: center; width: 80px; }
+        .inline-input:focus { outline: none; border-bottom: 2px solid var(--c-gold); }
+
+        .section-title { font-family: var(--font-serif); font-size: 1.1rem; color: var(--c-dark); margin: 30px 0 15px; padding-left: 10px; border-left: 4px solid var(--c-gold); font-weight: bold; }
+        
+        .legal-text { font-size: 0.9rem; color: #444; text-align: justify; line-height: 1.8; }
+        .legal-text p { margin-bottom: 10px; }
+        .legal-text ul { padding-left: 20px; margin: 5px 0 15px; }
+        .legal-text li { margin-bottom: 5px; }
+        
+        .highlight { color: var(--c-red); font-weight: bold; background: #FDEDEC; padding: 0 4px; border-radius: 2px;}
+        .money-val { font-family: monospace; font-weight: bold; color: var(--c-dark); }
+
+        /* 簽名區 */
+        .signature-section { margin-top: 50px; page-break-inside: avoid; }
+        .sign-area-box { border: 2px dashed #BDC3C7; background: #FAFAFA; border-radius: 8px; position: relative; height: 180px; margin-top: 10px; cursor: crosshair; overflow: hidden; touch-action: none; }
+        .sign-placeholder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #BDC3C7; font-size: 1.5rem; font-family: var(--font-serif); pointer-events: none; opacity: 0.5; }
+        .sign-placeholder::after { content: "( 請在此處簽名 )"; display: block; font-size: 0.8rem; text-align: center; margin-top: 5px; font-family: var(--font-sans); }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        .sign-tools { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .date-display { font-family: monospace; color: var(--c-dark); font-weight: bold; }
+        .btn-clear { background: none; border: none; color: var(--c-gray); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+        .btn-clear:hover { color: var(--c-red); }
+
+        .action-area { text-align: center; margin-top: 40px; }
+        .btn-submit { background-color: var(--c-dark); color: var(--c-gold); border: 1px solid var(--c-dark); padding: 18px 60px; font-size: 1.1rem; font-weight: bold; letter-spacing: 1px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(44, 62, 80, 0.2); display: inline-flex; align-items: center; gap: 10px; }
+        .btn-submit:hover { background-color: var(--c-gold); color: white; border-color: var(--c-gold); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(197, 164, 126, 0.3); }
+        .btn-submit:disabled { background-color: #BDC3C7; border-color: #BDC3C7; color: white; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .footer { text-align: center; color: #999; font-size: 0.8rem; padding: 40px 0; margin-top: auto; }
+        .highlight-error { animation: shake 0.5s; border-color: var(--c-red) !important; background-color: #FDEDEC !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        div:where(.swal2-container) h2:where(.swal2-title) { font-family: var(--font-serif) !important; color: var(--c-dark) !important; }
+        div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm { background-color: var(--c-gold) !important; box-shadow: 0 4px 15px rgba(197, 164, 126, 0.4) !important; }
+
+        @media (max-width: 768px) {
+            #capture-area { padding: 30px 20px; }
+            .form-grid { grid-template-columns: 1fr; gap: 15px; }
+            .header-section h1 { font-size: 1.5rem; }
+            .time-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar"><a href="#" class="nav-logo">廢墟 BAR | RUINS</a></nav>
+    <div class="header-section"><h1>場地租賃合約</h1><p>Venue Rental Agreement</p></div>
+
+    <div class="container">
+        <div id="capture-area">
+            <div class="contract-header"><h2>場地租賃合約書</h2><span>出租方：廢墟 BAR (甲方)</span></div>
+
+            <div class="form-grid">
+                <div class="form-group col-full">
+                    <label class="form-label">承租方 / 乙方 (Tenant Name / Company)</label>
+                    <input type="text" id="booker-name" class="form-input" placeholder="請輸入個人或公司名稱">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">聯絡電話 (Phone)</label>
+                    <input type="tel" id="booker-phone" class="form-input" placeholder="09xxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">活動主要內容 (Activity)</label>
+                    <input type="text" id="activity-content" class="form-input" placeholder="例如：派對、拍攝、講座...">
+                </div>
+            </div>
+
+            <div class="legal-text">
+                <p>立合約書人 出租方（以下簡稱甲方）：<strong>廢墟 BAR</strong> 與 承租方（以下簡稱乙方），雙方就場地租賃事宜，經協議訂立條款如下，以茲遵守：</p>
+
+                <div class="section-title">第一條：租賃標的與用途</div>
+                <p>
+                    1. 場地名稱：<strong>廢墟 BAR</strong><br>
+                    2. 場地地點：高雄市鹽埕區瀨南街205號<br>
+                    3. 使用用途：乙方租用場地主要用於上述填寫之活動內容，未經甲方同意，不得擅自變更用途或轉租他人。
+                </p>
+
+                <div class="section-title">第二條：租賃期間 (Rental Period)</div>
+                <div class="form-grid" style="margin-bottom: 10px;">
+                    <div class="form-group col-full">
+                        <label class="form-label">使用日期 (Date)</label>
+                        <input type="text" id="date-picker" class="form-input readonly" placeholder="請選擇使用日期" readonly>
+                    </div>
+                    <div class="form-group col-full time-group">
+                        <div>
+                            <label class="form-label">開始時間</label>
+                            <input type="time" id="time-start" class="form-input" value="13:00">
+                        </div>
+                        <div>
+                            <label class="form-label">結束時間</label>
+                            <input type="time" id="time-end" class="form-input" value="17:00">
+                        </div>
+                    </div>
+                </div>
+                <p style="font-size:0.85rem; color:#666;">
+                    * 上述時間包含進場佈置、活動進行及撤場清潔時間。<br>
+                    * <span class="highlight">超時費用</span>：若未於約定時間內完成撤場，超時未滿30分鐘以30分鐘計算，每30分鐘加收 NT$ 1,500 元；若影響下一組客人權益，甲方得請求損害賠償。
+                </p>
+
+                <div class="section-title">第三條：費用與付款方式 (Fees)</div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                    <div class="form-group">
+                        <label class="form-label">場地租金總額</label>
+                        <input type="number" id="fee-rent" class="form-input" placeholder="輸入金額">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">預約訂金 (30%)</label>
+                        <input type="number" id="fee-deposit" class="form-input" value="5000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">履約保證金</label>
+                        <input type="number" id="fee-bond" class="form-input" value="3000">
+                    </div>
+                </div>
+                <ul style="font-size:0.9rem;">
+                    <li><strong>訂金支付：</strong>乙方簽約時應支付訂金以保留檔期。</li>
+                    <li><strong>尾款支付：</strong>餘款應於活動當日入場前付清。</li>
+                    <li><strong>保證金退還：</strong>活動結束後，經甲方檢查場地設備無損壞、垃圾已依規定處理，保證金將全額無息退還。</li>
+                </ul>
+
+                <div class="section-title">第四條：取消與變更政策</div>
+                <ul>
+                    <li>活動日 14 天前通知：退還已付訂金 100%。</li>
+                    <li>活動日 7 至 13 天前通知：退還已付訂金 50%。</li>
+                    <li>活動日 3 至 6 天前通知：退還已付訂金 30%。</li>
+                    <li><span class="highlight">活動日 3 天內（含當日）取消</span>：訂金全額沒收，不予退還。</li>
+                    <li>如遇天災（如颱風高雄市政府宣布停班停課）等不可抗力因素，雙方可協議延期或全額退費。</li>
+                </ul>
+
+                <div class="section-title">第五條：場地使用規範 (重要)</div>
+                <p>為維護場地品質及周邊安寧，乙方同意遵守以下規範：</p>
+                <ul>
+                    <li><strong>佈置規範：</strong>嚴禁使用雙面膠、釘槍等會破壞牆面之黏著劑。建議使用無痕膠帶或輝柏黏土。若造成牆面剝落，將自保證金中扣除修復費用（每處最低 NT$ 500 元起）。</li>
+                    <li><strong>飲食與清潔：</strong>嚴禁於沙發或布織品上潑灑難以清洗之飲料（如紅酒）。垃圾需自行分類打包。若場地過度髒亂（如嘔吐物、砸派），加收特殊清潔費 NT$ 1,000 ~ 3,000 元。</li>
+                    <li><strong>安全與禁忌：</strong>全室內<span class="highlight">全面禁止吸菸</span>（含電子菸）。嚴禁使用明火（如蠟燭、仙女棒）、拉炮、粉塵。嚴禁賭博、吸毒、性交易。</li>
+                    <li><strong>音量控制：</strong>晚間 22:00 後請降低音量。若因音量過大遭檢舉，由乙方自行承擔責任。</li>
+                </ul>
+
+                <div class="section-title">第六條：設備損害賠償</div>
+                <p>乙方應愛惜使用場內所有設備。若因人為因素導致設備損壞、遺失或髒汙，乙方需照價賠償（包含維修費、運費及營業損失）。甲方不負保管乙方私人物品之責任。</p>
+
+                <div class="section-title">第七條：其他</div>
+                <p>本合約若有未盡事宜，依中華民國法律辦理。若發生訴訟，同意以臺灣高雄地方法院為第一審管轄法院。</p>
+            </div>
+
+            <div class="signature-section">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:5px;">
+                    <div style="font-weight:bold; font-family:var(--font-serif); font-size:1.1rem;">承租方(乙方) 簽名</div>
+                    <div style="font-size:0.8rem; color:#888;">本人已詳閱並同意上述所有條款</div>
+                </div>
+                <div class="sign-area-box" id="sign-wrapper">
+                    <span class="sign-placeholder">Sign Here</span>
+                    <canvas id="signature-canvas"></canvas>
+                </div>
+                <div class="sign-tools">
+                    <div id="date-display" class="date-display"></div>
+                    <button class="btn-clear" onclick="clearPad()"><i class="fa-solid fa-eraser"></i> 清除重簽</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button id="btn-submit" class="btn-submit" onclick="submitContract()">
+                <span id="btn-text">確認簽署並送出合約</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <p style="font-size:0.85rem; color:#999; margin-top:15px;"><i class="fa-solid fa-shield-halved"></i> 系統將自動生成合約 PDF 並加密存檔</p>
+        </div>
+    </div>
+
+    <footer class="footer">© 2025 廢墟 BAR (Ruins BAR). All Rights Reserved.</footer>
+
+    <script>
+        const GAS_APP_URL = "https://script.google.com/macros/s/AKfycbxZyXN9oDyue7XIMdgwc6e0yodkAxvOMlsbJ8cwtapK00epZEw5iWV8rSwRMjUYNenAAg/exec";
+        const MY_LIFF_ID = "2008582194-vLLGoM4M"; 
+
+        const { jsPDF } = window.jspdf;
+        let datePicker;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof liff !== 'undefined') { liff.init({ liffId: MY_LIFF_ID }).catch(err => console.error(err)); }
+            // 改為單日選擇
+            datePicker = flatpickr("#date-picker", { 
+                mode: "single", 
+                minDate: "today", 
+                dateFormat: "Y-m-d", 
+                locale: "zh_tw" 
+            });
+            initSignaturePad();
+            
+            // 顯示當前日期
+            const now = new Date();
+            document.getElementById('date-display').innerText = "簽署日期: " + now.toLocaleDateString('zh-TW');
+        });
+
+        const canvas = document.getElementById('signature-canvas');
+        const ctx = canvas.getContext('2d');
+        let hasSigned = false;
+
+        function initSignaturePad() {
+            const wrapper = document.getElementById('sign-wrapper');
+            function resize() {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = wrapper.offsetWidth * ratio;
+                canvas.height = wrapper.offsetHeight * ratio;
+                ctx.scale(ratio, ratio);
+                ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
+            }
+            window.addEventListener('resize', resize);
+            resize(); 
+            let isDrawing = false;
+            
+            const start = (e) => { 
+                if(e.type === 'touchstart') e.preventDefault();
+                isDrawing = true; hasSigned = true; 
+                document.querySelector('.sign-placeholder').style.display = 'none'; 
+                ctx.beginPath(); draw(e); 
+            };
+            const end = () => { isDrawing = false; ctx.beginPath(); };
+            const draw = (e) => {
+                if(!isDrawing) return;
+                if(e.type === 'touchmove') e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                let x = (e.clientX || e.touches[0].clientX) - rect.left;
+                let y = (e.clientY || e.touches[0].clientY) - rect.top;
+                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+            };
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', end);
+            canvas.addEventListener('touchstart', start, {passive: false});
+            canvas.addEventListener('touchmove', draw, {passive: false});
+            canvas.addEventListener('touchend', end);
+        }
+
+        function clearPad() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.querySelector('.sign-placeholder').style.display = 'block';
+            hasSigned = false;
+        }
+
+        async function submitContract() {
+            const name = document.getElementById('booker-name').value.trim();
+            const phone = document.getElementById('booker-phone').value.trim();
+            const activity = document.getElementById('activity-content').value.trim();
+            const dateVal = document.getElementById('date-picker').value;
+            const timeStart = document.getElementById('time-start').value;
+            const timeEnd = document.getElementById('time-end').value;
+            const feeRent = document.getElementById('fee-rent').value;
+
+            const phoneRegex = /^09\d{8}$/;
+
+            // 驗證邏輯
+            if (!name) return alertAndFocus("請輸入承租方姓名/公司", "booker-name");
+            if (!phoneRegex.test(phone)) return alertAndFocus("請輸入正確的手機號碼", "booker-phone");
+            if (!activity) return alertAndFocus("請輸入活動主要內容", "activity-content");
+            if (!dateVal) return alertAndFocus("請選擇使用日期", "date-picker");
+            if (!feeRent) return alertAndFocus("請填寫場地租金金額", "fee-rent");
+            if (!hasSigned) return alertAndFocus("請在下方簽名欄位簽名", "sign-wrapper");
+
+            const btn = document.getElementById('btn-submit');
+            const btnText = document.getElementById('btn-text');
+            
+            btn.disabled = true;
+            btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 合約生成中...';
+
+            try {
+                // 檔名規則: 日期_廢墟BAR_姓名_電話.pdf
+                const cleanDate = dateVal.replace(/-/g, '');
+                const fileName = `${cleanDate}_廢墟BAR_${name}.pdf`;
+
+                const captureArea = document.getElementById("capture-area");
+                
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const scale = isMobile ? 2 : 3;
+                const quality = isMobile ? 0.6 : 0.75;
+
+                const canvasData = await html2canvas(captureArea, { scale: scale, useCORS: true, backgroundColor: "#ffffff", logging: false });
+                const imgData = canvasData.toDataURL('image/jpeg', quality);
+                
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                if (imgHeight > pdf.internal.pageSize.getHeight()) {
+                    const longPdf = new jsPDF('p', 'mm', [pdfWidth, imgHeight + 10]);
+                    longPdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgHeight);
+                    var pdfBase64 = longPdf.output('datauristring');
+                } else {
+                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgHeight);
+                    var pdfBase64 = pdf.output('datauristring');
+                }
+
+                btnText.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> 上傳中...';
+
+                // 上傳到 GAS (保持原邏輯)
+                const response = await fetch(GAS_APP_URL, {
+                    method: "POST",
+                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ type: "UPLOAD_IMG", image: pdfBase64, filename: fileName, user: name })
+                });
+
+                const textResponse = await response.text();
+                let result;
+                try { result = JSON.parse(textResponse); } catch(e) { throw new Error("伺服器回應錯誤"); }
+
+                if (result.status === "success") {
+                    const downloadLink = result.url;
+                    
+                    if (liff.isInClient()) {
+                        try {
+                            const flexMessage = {
+                                "type": "flex",
+                                "altText": "✅ 廢墟 BAR 場地合約已簽署完成",
+                                "contents": {
+                                    "type": "bubble",
+                                    "size": "mega",
+                                    "header": {
+                                        "type": "box", "layout": "vertical", "backgroundColor": "#1a1a1a", "paddingAll": "xl",
+                                        "contents": [
+                                            { "type": "text", "text": "✅ 簽約完成確認", "color": "#c5a47e", "weight": "bold", "size": "lg", "align": "center" },
+                                            { "type": "text", "text": "VENUE RENTAL CONTRACT", "color": "#95A5A6", "size": "xxs", "align": "center", "margin": "xs", "letterSpacing": "1px" }
+                                        ]
+                                    },
+                                    "body": {
+                                        "type": "box", "layout": "vertical", "paddingAll": "xl",
+                                        "contents": [
+                                            { "type": "text", "text": `承租人：${name}`, "weight": "bold", "size": "md", "color": "#1a1a1a" },
+                                            { "type": "text", "text": "您的場地租賃合約已完成簽署。", "size": "sm", "color": "#7F8C8D", "margin": "sm" },
+                                            { "type": "separator", "margin": "xl" },
+                                            {
+                                                "type": "box", "layout": "vertical", "margin": "xl", "spacing": "sm",
+                                                "contents": [
+                                                    { "type": "box", "layout": "baseline", "contents": [{ "type": "text", "text": "📍 地點", "color": "#95A5A6", "size": "sm", "flex": 2 }, { "type": "text", "text": "廢墟 BAR", "wrap": true, "color": "#1a1a1a", "size": "sm", "flex": 5, "weight": "bold" }] },
+                                                    { "type": "box", "layout": "baseline", "contents": [{ "type": "text", "text": "📅 日期", "color": "#95A5A6", "size": "sm", "flex": 2 }, { "type": "text", "text": dateVal, "color": "#1a1a1a", "size": "sm", "flex": 5 }] },
+                                                    { "type": "box", "layout": "baseline", "contents": [{ "type": "text", "text": "⏰ 時段", "color": "#95A5A6", "size": "sm", "flex": 2 }, { "type": "text", "text": `${timeStart} - ${timeEnd}`, "color": "#1a1a1a", "size": "sm", "flex": 5 }] }
+                                                ]
+                                            },
+                                            { "type": "separator", "margin": "xl" },
+                                            { "type": "button", "style": "primary", "height": "sm", "color": "#c5a47e", "margin": "md", "action": { "type": "uri", "label": "下載合約 PDF", "uri": downloadLink } },
+                                            { "type": "text", "text": "⚠️ 連結 15 天內有效，請盡速下載。", "size": "xxs", "color": "#E74C3C", "margin": "md", "align": "center" }
+                                        ]
+                                    }
+                                }
+                            };
+                            await liff.sendMessages([flexMessage]);
+                        } catch (msgErr) {
+                            console.error("Flex failed", msgErr);
+                            await liff.sendMessages([{ type: "text", text: `【簽約完成】\n承租人：${name}\n日期：${dateVal}\n合約下載：${downloadLink}` }]);
+                        }
+                        await Swal.fire({ icon: 'success', title: '簽署完成', text: '合約已傳送至 LINE', confirmButtonColor: '#1a1a1a', timer: 3000 });
+                        liff.closeWindow();
+                        
+                    } else {
+                        Swal.fire({
+                            icon: 'success', title: '簽約成功！',
+                            html: `<a href="${downloadLink}" target="_blank" style="display:block; background:#c5a47e; color:white; padding:15px; border-radius:50px; text-decoration:none; font-weight:bold; margin-top:20px;">下載合約 PDF</a>`,
+                            showConfirmButton: false, showCloseButton: true, width: '450px'
+                        });
+                    }
+                } else { throw new Error(result.msg || "上傳失敗"); }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: '上傳失敗', text: "伺服器忙碌中，請稍後再試。", confirmButtonColor: '#d33' });
+            } finally {
+                btn.disabled = false;
+                btnText.innerHTML = "確認簽署並送出合約";
+            }
+        }
+
+        function alertAndFocus(msg, id) {
+            Swal.fire({ icon: 'warning', title: '請檢查欄位', text: msg, confirmButtonColor: '#c5a47e' }).then(() => {
+                const el = document.getElementById(id);
+                if(el) { el.scrollIntoView({behavior: "smooth", block: "center"}); el.classList.add('highlight-error'); setTimeout(() => el.classList.remove('highlight-error'), 1500); }
+            });
+        }
+    </script>
+</body>
+</html>

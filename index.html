@@ -819,10 +819,64 @@
             document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
+        // 修改後的送出函式
         function sendFinalToLine() {
             const name = document.getElementById('guestName').value;
             const phone = document.getElementById('guestPhone').value;
-            if(!name || !phone) { alert("請填寫姓名與電話"); return; }
+            
+            // 1. 驗證資料
+            if(!name || !phone) { 
+                alert("請填寫姓名與電話，以便我們進行登記！"); 
+                // 聚焦到輸入框
+                if(!name) document.getElementById('guestName').focus();
+                else document.getElementById('guestPhone').focus();
+                return; 
+            }
+
+            // 2. 準備按鈕 UI (顯示讀取中)
+            const submitBtn = document.querySelector('button[onclick="sendFinalToLine()"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 資料登記中...';
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            // 3. 準備要傳送給 Google Sheet 的資料物件
+            const sheetData = {
+                name: name,
+                phone: phone,
+                plan: currentPlan.name,
+                date: document.getElementById('invDate').innerText,
+                time: document.getElementById('invTimeRange').innerText,
+                total: bookingData.finalTotal
+            };
+
+            // 4. 發送資料到 Google Sheet
+            // 使用 text/plain 避免 CORS 預檢請求問題
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(sheetData),
+                headers: { "Content-Type": "text/plain" }
+            })
+            .then(response => {
+                console.log("Sheet update success");
+                // 這裡不管後端回傳什麼，我們都繼續執行 LINE 的流程
+                proceedToLine(name, phone);
+            })
+            .catch(error => {
+                console.error("Sheet update error:", error);
+                // 即使 Google Sheet 寫入失敗，也要讓客人能去 LINE
+                proceedToLine(name, phone);
+            })
+            .finally(() => {
+                // 恢復按鈕狀態
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            });
+        }
+
+        // 這是原本產生文字並複製的邏輯，被獨立出來
+        function proceedToLine(name, phone) {
             let detailsText = "";
             
             // Re-calc for text
@@ -838,7 +892,7 @@
                         let includedQty = includedCounts[id] || 0;
                         detailsText += `- ${item.name} x ${qty} ${item.unit} (內含:${includedQty})\n`;
                         if (bookingData[`menu_${id}`]) {
-                            detailsText += `  口味: ${bookingData[`menu_${id}`].join(', ')}\n`;
+                            detailsText += `   口味: ${bookingData[`menu_${id}`].join(', ')}\n`;
                         }
                     }
                 }
@@ -851,14 +905,17 @@
             
             let includesText = "";
             if(currentPlan.includes && currentPlan.includes.length > 0) {
-                // Deduplicate for text
                 const uniqueIncludes = [...new Set(currentPlan.includes)];
                 uniqueIncludes.forEach(incId => {
                     const item = ADDONS_DB.find(a => a.id === incId);
                     if(item) includesText += `- ${item.name} (內含)\n`;
                 });
             }
+
+            // 組合 LINE 訊息文字
             let msg = `您好！我想預約 RUINS BAR 🥂\n\n👤 姓名：${name}\n📱 電話：${phone}\n------------------------\n📅 日期：${document.getElementById('invDate').innerText}\n⏰ 時段：${document.getElementById('invTimeRange').innerText}\n📋 方案：${currentPlan.name}\n\n✅ 方案基本內含：\n${includesText}\n➕ 加購/升級內容：\n${detailsText}\n💰 預估總價：NT$ ${bookingData.finalTotal.toLocaleString()}\n\n請協助確認檔期，謝謝！`;
+
+            // 執行複製並顯示成功視窗
             copyToClipboard(msg).then(() => {
                 document.getElementById('copySuccessModal').classList.remove('hidden');
                 closeModal();

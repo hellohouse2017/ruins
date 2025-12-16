@@ -260,7 +260,7 @@
         });
 
         // ==========================================
-        // 新增：查詢預約並自動填入功能
+        // 修改版：查詢預約 (包含除錯訊息顯示)
         // ==========================================
         async function searchReservation() {
             const name = document.getElementById('booker-name').value.trim();
@@ -276,11 +276,17 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 查詢中...';
 
             try {
+                // 發送請求
                 const response = await fetch(GAS_APP_URL, {
                     method: "POST",
                     redirect: "follow",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ type: "SEARCH_RESERVATION", name: name, phone: phone })
+                    // 注意：這裡我們會把電話號碼中的 - 拿掉再送出，增加容錯率
+                    body: JSON.stringify({ 
+                        type: "SEARCH_RESERVATION", 
+                        name: name, 
+                        phone: phone.replace(/-/g, '') 
+                    })
                 });
 
                 const res = await response.json();
@@ -301,7 +307,7 @@
                         document.getElementById('fee-rent').value = data.price;
                     }
 
-                    // 4. 解析並填入時間 (假設後端格式為 "13:00-17:00")
+                    // 4. 解析並填入時間
                     if (data.time && data.time.includes('-')) {
                         const parts = data.time.split('-');
                         document.getElementById('time-start').value = parts[0].trim();
@@ -310,7 +316,29 @@
 
                     Swal.fire({ icon: 'success', title: '已帶入資料', text: '請核對合約內容是否正確', timer: 1500, showConfirmButton: false });
                 } else {
-                    Swal.fire({ icon: 'error', title: '找不到預約', text: '請確認姓名電話是否與預約時一致，或直接手動填寫。', confirmButtonColor: '#c5a47e' });
+                    // ★★★ 修改重點：顯示後端回傳的除錯訊息 ★★★
+                    // 如果後端有回傳 debug 資訊，就顯示出來，不然顯示預設訊息
+                    let debugInfo = res.debug || '無詳細比對資訊';
+                    
+                    // 如果 debug 是物件，轉成字串方便閱讀
+                    if (typeof debugInfo === 'object') {
+                        debugInfo = JSON.stringify(debugInfo, null, 2);
+                    }
+
+                    Swal.fire({ 
+                        icon: 'error', 
+                        title: '找不到符合的預約', 
+                        // 使用 HTML 顯示詳細比對狀況
+                        html: `
+                            <div style="text-align:left; font-size:0.9rem; background:#f4f4f4; padding:10px; border-radius:5px;">
+                                <p><strong>您輸入的資料：</strong><br>姓名: ${name}<br>電話: ${phone}</p>
+                                <hr style="margin:5px 0; border:0; border-top:1px dashed #ccc;">
+                                <p style="color:#d33; white-space: pre-wrap;"><strong>後端比對結果：</strong><br>${debugInfo}</p>
+                            </div>
+                            <p style="margin-top:10px; font-size:0.8rem; color:#888;">請截圖此畫面傳給管理員，或確認 Google Sheet 資料。</p>
+                        `, 
+                        confirmButtonColor: '#c5a47e' 
+                    });
                 }
 
             } catch (error) {

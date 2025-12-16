@@ -44,7 +44,7 @@
 
         /* Form Grid System */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .form-group { margin-bottom: 5px; }
+        .form-group { margin-bottom: 5px; position: relative; }
         .col-full { grid-column: 1 / -1; } 
         .col-third { grid-template-columns: 1fr 1fr 1fr; }
 
@@ -52,6 +52,12 @@
         .form-input { width: 100%; padding: 10px; font-size: 0.95rem; color: var(--c-dark); font-family: var(--font-serif); border: 1px solid #DDD; border-radius: 4px; background: #FAFAFA; transition: 0.3s; }
         .form-input:focus { outline: none; border-color: var(--c-gold); background: #FFF; box-shadow: 0 0 0 3px rgba(197, 164, 126, 0.1); }
         .form-input.readonly { background: #F9F5EB; border-color: #E0D6C3; color: #8A7A5B; font-weight: bold; cursor: default; }
+
+        /* 新增：查詢按鈕樣式 */
+        .input-group { display: flex; gap: 8px; }
+        .btn-search { background-color: var(--c-gold); color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .btn-search:hover { background-color: #b08d66; }
+        .btn-search:disabled { background-color: #ddd; cursor: not-allowed; }
 
         .inline-input { border: none; border-bottom: 1px solid #888; background: transparent; padding: 0 5px; font-family: var(--font-serif); font-weight: bold; color: var(--c-dark); text-align: center; width: 80px; }
         .inline-input:focus { outline: none; border-bottom: 2px solid var(--c-gold); }
@@ -108,16 +114,21 @@
 
             <div class="form-grid">
                 <div class="form-group col-full">
-                    <label class="form-label">承租方 / 乙方 (Tenant Name / Company)</label>
-                    <input type="text" id="booker-name" class="form-input" placeholder="請輸入個人或公司名稱">
+                    <label class="form-label">承租方 / 乙方 (Tenant Name)</label>
+                    <input type="text" id="booker-name" class="form-input" placeholder="請輸入當初預約的姓名">
                 </div>
-                <div class="form-group">
+                <div class="form-group col-full">
                     <label class="form-label">聯絡電話 (Phone)</label>
-                    <input type="tel" id="booker-phone" class="form-input" placeholder="09xxxxxxxx">
+                    <div class="input-group">
+                        <input type="tel" id="booker-phone" class="form-input" placeholder="請輸入當初預約的手機">
+                        <button type="button" class="btn-search" onclick="searchReservation()" id="btn-search">
+                            <i class="fa-solid fa-magnifying-glass"></i> 帶入預約
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-full">
                     <label class="form-label">活動主要內容 (Activity)</label>
-                    <input type="text" id="activity-content" class="form-input" placeholder="例如：派對、拍攝、講座...">
+                    <input type="text" id="activity-content" class="form-input" placeholder="系統將自動帶入或請自行填寫">
                 </div>
             </div>
 
@@ -135,7 +146,7 @@
                 <div class="form-grid" style="margin-bottom: 10px;">
                     <div class="form-group col-full">
                         <label class="form-label">使用日期 (Date)</label>
-                        <input type="text" id="date-picker" class="form-input readonly" placeholder="請選擇使用日期" readonly>
+                        <input type="text" id="date-picker" class="form-input readonly" placeholder="自動帶入" readonly>
                     </div>
                     <div class="form-group col-full time-group">
                         <div>
@@ -157,7 +168,7 @@
                 <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; gap:10px;">
                     <div class="form-group">
                         <label class="form-label">場地租金總額</label>
-                        <input type="number" id="fee-rent" class="form-input" placeholder="輸入金額">
+                        <input type="number" id="fee-rent" class="form-input" placeholder="金額">
                     </div>
                     <div class="form-group">
                         <label class="form-label">預約訂金 (30%)</label>
@@ -235,7 +246,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof liff !== 'undefined') { liff.init({ liffId: MY_LIFF_ID }).catch(err => console.error(err)); }
-            // 改為單日選擇
+            
             datePicker = flatpickr("#date-picker", { 
                 mode: "single", 
                 minDate: "today", 
@@ -244,10 +255,72 @@
             });
             initSignaturePad();
             
-            // 顯示當前日期
             const now = new Date();
             document.getElementById('date-display').innerText = "簽署日期: " + now.toLocaleDateString('zh-TW');
         });
+
+        // ==========================================
+        // 新增：查詢預約並自動填入功能
+        // ==========================================
+        async function searchReservation() {
+            const name = document.getElementById('booker-name').value.trim();
+            const phone = document.getElementById('booker-phone').value.trim();
+            const btn = document.getElementById('btn-search');
+
+            if (!name || !phone) {
+                return Swal.fire({ icon: 'warning', title: '資料不全', text: '請先輸入姓名與電話才能查詢', confirmButtonColor: '#c5a47e' });
+            }
+
+            // UI 鎖定
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 查詢中...';
+
+            try {
+                const response = await fetch(GAS_APP_URL, {
+                    method: "POST",
+                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ type: "SEARCH_RESERVATION", name: name, phone: phone })
+                });
+
+                const res = await response.json();
+
+                if (res.status === 'success' && res.found) {
+                    const data = res.data;
+                    
+                    // 1. 填入活動內容
+                    document.getElementById('activity-content').value = data.plan || '';
+                    
+                    // 2. 填入日期
+                    if (data.date) {
+                        datePicker.setDate(data.date);
+                    }
+                    
+                    // 3. 填入金額
+                    if (data.price) {
+                        document.getElementById('fee-rent').value = data.price;
+                    }
+
+                    // 4. 解析並填入時間 (假設後端格式為 "13:00-17:00")
+                    if (data.time && data.time.includes('-')) {
+                        const parts = data.time.split('-');
+                        document.getElementById('time-start').value = parts[0].trim();
+                        document.getElementById('time-end').value = parts[1].trim();
+                    }
+
+                    Swal.fire({ icon: 'success', title: '已帶入資料', text: '請核對合約內容是否正確', timer: 1500, showConfirmButton: false });
+                } else {
+                    Swal.fire({ icon: 'error', title: '找不到預約', text: '請確認姓名電話是否與預約時一致，或直接手動填寫。', confirmButtonColor: '#c5a47e' });
+                }
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: '系統錯誤', text: '無法連線至資料庫，請稍後再試。' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> 帶入預約';
+            }
+        }
 
         const canvas = document.getElementById('signature-canvas');
         const ctx = canvas.getContext('2d');
@@ -306,7 +379,6 @@
 
             const phoneRegex = /^09\d{8}$/;
 
-            // 驗證邏輯
             if (!name) return alertAndFocus("請輸入承租方姓名/公司", "booker-name");
             if (!phoneRegex.test(phone)) return alertAndFocus("請輸入正確的手機號碼", "booker-phone");
             if (!activity) return alertAndFocus("請輸入活動主要內容", "activity-content");
@@ -321,7 +393,6 @@
             btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 合約生成中...';
 
             try {
-                // 檔名規則: 日期_廢墟BAR_姓名_電話.pdf
                 const cleanDate = dateVal.replace(/-/g, '');
                 const fileName = `${cleanDate}_廢墟BAR_${name}.pdf`;
 
@@ -350,7 +421,7 @@
 
                 btnText.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> 上傳中...';
 
-                // 上傳到 GAS (保持原邏輯)
+                // 上傳合約圖片
                 const response = await fetch(GAS_APP_URL, {
                     method: "POST",
                     redirect: "follow",
@@ -404,7 +475,6 @@
                             await liff.sendMessages([flexMessage]);
                         } catch (msgErr) {
                             console.error("Flex failed", msgErr);
-                            await liff.sendMessages([{ type: "text", text: `【簽約完成】\n承租人：${name}\n日期：${dateVal}\n合約下載：${downloadLink}` }]);
                         }
                         await Swal.fire({ icon: 'success', title: '簽署完成', text: '合約已傳送至 LINE', confirmButtonColor: '#1a1a1a', timer: 3000 });
                         liff.closeWindow();

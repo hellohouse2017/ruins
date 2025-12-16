@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
     
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -272,19 +274,19 @@
                             <div class="border-t-2 border-dashed border-gray-300 pt-4 mt-4">
                                 <h5 class="font-bold text-gray-700 mb-3 flex items-center"><i class="fas fa-user-edit mr-2"></i> 預約人資料</h5>
                                 <div class="mb-3">
-    <label class="block text-gray-500 text-xs font-bold mb-1">您的姓名</label>
-    <input type="text" id="guestName" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="例：陳先生">
-</div>
+                                    <label class="block text-gray-500 text-xs font-bold mb-1">您的姓名</label>
+                                    <input type="text" id="guestName" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="例：陳先生">
+                                </div>
 
-<div class="mb-3">
-    <label class="block text-gray-500 text-xs font-bold mb-1">聯絡電話</label>
-    <input type="tel" id="guestPhone" maxlength="10" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="09xxxxxxxx">
-</div>
+                                <div class="mb-3">
+                                    <label class="block text-gray-500 text-xs font-bold mb-1">聯絡電話</label>
+                                    <input type="tel" id="guestPhone" maxlength="10" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="09xxxxxxxx">
+                                </div>
 
-<div class="mb-3">
-    <label class="block text-gray-500 text-xs font-bold mb-1">電子信箱 (接收付款通知用)</label>
-    <input type="email" id="guestEmail" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="example@gmail.com">
-</div>
+                                <div class="mb-3">
+                                    <label class="block text-gray-500 text-xs font-bold mb-1">電子信箱 (接收付款通知用)</label>
+                                    <input type="email" id="guestEmail" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-black" placeholder="example@gmail.com">
+                                </div>
                             </div>
                         </div>
 
@@ -312,11 +314,12 @@
 
     <script>
         // ==========================================
-        // 請務必確認這裡的 GAS_URL 是您剛剛部署好的新網址
+        // 設定區
         // ==========================================
         const GAS_URL = "https://script.google.com/macros/s/AKfycbzk5VWXvgDJLoLW_eTYuXIxh_ziCrD9mbRsvtrK-Aulasx4eMt6QT9mzuq3HeQ8UGspxw/exec";
+        const MY_LIFF_ID = "2008702134-FRWP0LWx"; 
         const LINE_ID = "@529ldsir"; 
-        const LINE_DEEP_LINK = "line://ti/p/" + LINE_ID;
+        const LINE_DEEP_LINK = "https://line.me/R/ti/p/" + LINE_ID;
 
         // Data for Menus
         const MENUS = {
@@ -355,10 +358,35 @@
         let isWeekend = false;
         let currentSlotMode = '';
 
+        // ★★★ 初始化 LIFF 與 讀取資料 ★★★
         window.onload = function() {
+            // 1. 初始化 LIFF
+            initializeLiff(MY_LIFF_ID);
+            
+            // 2. 載入資料
             fetchData();
             initCustomTimeSelects();
         };
+
+        function initializeLiff(liffId) {
+            if (!liffId) {
+                console.log('未設定 LIFF ID');
+                return;
+            }
+            liff.init({ liffId: liffId })
+            .then(() => {
+                // 初始化成功
+                if (!liff.isLoggedIn()) {
+                    // 如果尚未登入，執行登入 (才能抓到 User ID)
+                    liff.login(); 
+                } else {
+                    console.log("LIFF Login OK, ID: " + liff.getContext().userId);
+                }
+            })
+            .catch((err) => {
+                console.error('LIFF Init failed', err);
+            });
+        }
 
         function fetchData() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -846,12 +874,18 @@
 
             // ★★★ 關鍵：獲取 LINE User ID ★★★
             let lineUserId = "";
-            if (liff.isInClient() && liff.getContext()) {
-                lineUserId = liff.getContext().userId;
-            } else {
-                // 如果是在外部瀏覽器打開，可能抓不到，這裡可以選擇是否要強制登入
-                console.log("無法獲取 LINE User ID (可能非 LINE 內開啟)");
+            // 嘗試取得 context
+            try {
+                if (liff.isInClient() && liff.getContext() && liff.getContext().userId) {
+                    lineUserId = liff.getContext().userId;
+                } else if (liff.isLoggedIn()) {
+                    lineUserId = liff.getContext().userId;
+                }
+            } catch(e) {
+                console.log("無法獲取 User ID: " + e.message);
             }
+            
+            console.log("Sending User ID: " + lineUserId);
 
             const submitBtn = document.querySelector('button[onclick="sendFinalToLine()"]');
             const originalBtnText = submitBtn.innerHTML;
@@ -892,7 +926,8 @@
                 note: "" 
             };
 
-            fetch(GAS_APP_URL, {
+            // 注意：這裡統一使用 GAS_URL 變數
+            fetch(GAS_URL, {
                 method: 'POST',
                 body: JSON.stringify(sheetData),
                 headers: { "Content-Type": "text/plain" }

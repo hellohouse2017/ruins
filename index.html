@@ -833,22 +833,24 @@
         function sendFinalToLine() {
             const name = document.getElementById('guestName').value.trim();
             const phone = document.getElementById('guestPhone').value.trim();
-            const email = document.getElementById('guestEmail').value.trim(); // ★ 1. 抓取 Email
+            const email = document.getElementById('guestEmail').value.trim();
             
-            // ★ 2. 驗證欄位 (包含 Email)
             if(!name || !phone || !email) { 
                 alert("請完整填寫姓名、電話與 Email，以便我們進行登記！"); 
-                if(!name) document.getElementById('guestName').focus();
-                else if(!phone) document.getElementById('guestPhone').focus();
-                else document.getElementById('guestEmail').focus();
                 return; 
             }
-
-            // 簡單的 Email 格式檢查
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 alert("Email 格式不正確，請檢查。");
-                document.getElementById('guestEmail').focus();
                 return;
+            }
+
+            // ★★★ 關鍵：獲取 LINE User ID ★★★
+            let lineUserId = "";
+            if (liff.isInClient() && liff.getContext()) {
+                lineUserId = liff.getContext().userId;
+            } else {
+                // 如果是在外部瀏覽器打開，可能抓不到，這裡可以選擇是否要強制登入
+                console.log("無法獲取 LINE User ID (可能非 LINE 內開啟)");
             }
 
             const submitBtn = document.querySelector('button[onclick="sendFinalToLine()"]');
@@ -857,7 +859,6 @@
             submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 資料登記中...';
             submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
-            // --- 組合加購項目字串 (保持原樣) ---
             let addonsList = [];
             for (const [id, qty] of Object.entries(addonQuantities)) {
                 if (qty > 0) {
@@ -876,14 +877,13 @@
                 if(item) addonsList.push(item.name);
             });
             const finalAddonsString = addonsList.join(', ');
-            // ----------------------------------
 
-            // ★ 3. 將 Email 加入傳送資料
             const sheetData = {
                 type: 'BOOKING',
                 name: name,
                 phone: phone,
-                email: email, // ★ 新增這一行
+                email: email,
+                lineUserId: lineUserId, // ★ 將抓到的 ID 傳給後端
                 planName: currentPlan.name,
                 totalPrice: bookingData.finalTotal,
                 date: document.getElementById('invDate').innerText,
@@ -892,14 +892,14 @@
                 note: "" 
             };
 
-            fetch(GAS_URL, {
+            fetch(GAS_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify(sheetData),
                 headers: { "Content-Type": "text/plain" }
             })
             .then(response => {
                 console.log("Sheet update success");
-                proceedToLine(name, phone); // LINE 訊息其實可以不用顯示 Email，只要 Sheet 有存就好
+                proceedToLine(name, phone);
             })
             .catch(error => {
                 console.error("Sheet update error:", error);

@@ -424,6 +424,9 @@
             const timeStart = document.getElementById('time-start').value;
             const timeEnd = document.getElementById('time-end').value;
             const feeRent = document.getElementById('fee-rent').value;
+            
+            // ★★★ 新增：取得頁面上計算好的預付款金額
+            const finalPrepayment = document.getElementById('fee-prepayment').value;
 
             const phoneRegex = /^09\d{8}$/;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -470,14 +473,23 @@
                     var pdfBase64 = pdf.output('datauristring');
                 }
 
-                btnText.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> 上傳中...';
+                btnText.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> 上傳並存檔中...';
 
                 // 上傳合約圖片
                 const response = await fetch(GAS_APP_URL, {
                     method: "POST",
                     redirect: "follow",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ type: "UPLOAD_IMG", image: pdfBase64, filename: fileName, user: name })
+                    body: JSON.stringify({ 
+                        type: "UPLOAD_IMG", 
+                        image: pdfBase64, 
+                        filename: fileName, 
+                        user: name,
+                        // ★★★ 傳送給後端以便回寫 Sheet ★★★
+                        phone: phone.replace(/-/g, ''), 
+                        email: email, 
+                        prepayment: finalPrepayment
+                    })
                 });
 
                 const textResponse = await response.text();

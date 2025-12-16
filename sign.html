@@ -113,10 +113,6 @@
                     <input type="text" id="booker-name" class="form-input" placeholder="請輸入當初預約的姓名">
                 </div>
                 <div class="form-group col-full">
-                    <label class="form-label">電子信箱 (Email)</label>
-                    <input type="email" id="booker-email" class="form-input" placeholder="請填寫 Email 以接收專案預付款通知">
-                </div>
-                <div class="form-group col-full">
                     <label class="form-label">聯絡電話 (Phone)</label>
                     <div class="input-group">
                         <input type="tel" id="booker-phone" class="form-input" placeholder="請輸入當初預約的手機">
@@ -124,6 +120,10 @@
                             <i class="fa-solid fa-magnifying-glass"></i> 帶入預約
                         </button>
                     </div>
+                </div>
+                <div class="form-group col-full">
+                    <label class="form-label">電子信箱 (Email)</label>
+                    <input type="email" id="booker-email" class="form-input" placeholder="請填寫或確認 Email">
                 </div>
                 <div class="form-group col-full">
                     <label class="form-label">活動主要內容 (Activity)</label>
@@ -302,6 +302,11 @@
                     document.getElementById('activity-content').value = data.plan || '';
                     if (data.date) { datePicker.setDate(data.date); }
                     if (data.price) { document.getElementById('fee-rent').value = data.price; }
+                    
+                    // ★★★ 新增：自動帶入 Email (如果後端有回傳) ★★★
+                    if (data.email) { 
+                        document.getElementById('booker-email').value = data.email; 
+                    }
 
                     if (data.time && data.time.includes('-')) {
                         const parts = data.time.split('-');
@@ -309,21 +314,15 @@
                         document.getElementById('time-end').value = parts[1].trim();
                     }
 
-                    // ==========================================
-                    // ★★★ 新增：專案預付款自動計算邏輯 ★★★
-                    // ==========================================
+                    // 預付款計算邏輯
                     let totalPrice = parseInt(data.price || 0);
                     let planName = (data.plan || "").toString();
                     let addonsStr = (data.addons || "").toString();
 
-                    // 1. 判斷是否為「純場地」或「會議」方案
                     let isSimplePlan = planName.includes("純場地") || planName.includes("會議");
-
-                    // 2. 判斷加購項目 (去掉 "桌"、"椅"、"," 後，如果還有其他字，代表有雜項加購)
                     let cleanAddons = addonsStr.replace(/桌/g, "").replace(/椅/g, "").replace(/,/g, "").trim();
                     let hasComplexAddons = (cleanAddons.length > 0);
 
-                    // 3. 計算預付款
                     let prepayment = 0;
                     if (isSimplePlan && !hasComplexAddons) {
                         prepayment = 0;
@@ -332,7 +331,6 @@
                     }
 
                     document.getElementById('fee-prepayment').value = prepayment;
-                    // ==========================================
 
                     Swal.fire({ icon: 'success', title: '已帶入資料', text: '系統已自動計算專案預付款', timer: 1500, showConfirmButton: false });
                 } else {
@@ -466,7 +464,7 @@
 
                 btnText.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> 上傳中...';
 
-                // 上傳合約圖片 (注意：目前後端只有儲存圖片，尚未將 Email 寫回 Google Sheet)
+                // 上傳合約圖片
                 const response = await fetch(GAS_APP_URL, {
                     method: "POST",
                     redirect: "follow",

@@ -53,7 +53,6 @@
         .form-input:focus { outline: none; border-color: var(--c-gold); background: #FFF; box-shadow: 0 0 0 3px rgba(197, 164, 126, 0.1); }
         .form-input.readonly { background: #F9F5EB; border-color: #E0D6C3; color: #8A7A5B; font-weight: bold; cursor: default; }
 
-        /* 新增：查詢按鈕樣式 */
         .input-group { display: flex; gap: 8px; }
         .btn-search { background-color: var(--c-gold); color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .btn-search:hover { background-color: #b08d66; }
@@ -165,32 +164,40 @@
                 </p>
 
                 <div class="section-title">第三條：費用與付款方式 (Fees)</div>
-                <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
                     <div class="form-group">
                         <label class="form-label">場地租金總額</label>
-                        <input type="number" id="fee-rent" class="form-input" placeholder="金額">
+                        <input type="number" id="fee-rent" class="form-input" placeholder="總金額">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">預約訂金 (30%)</label>
-                        <input type="number" id="fee-deposit" class="form-input" value="5000">
+                        <label class="form-label">場地預約訂金 (固定)</label>
+                        <input type="number" id="fee-deposit" class="form-input readonly" value="5000" readonly>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">履約保證金</label>
-                        <input type="number" id="fee-bond" class="form-input" value="3000">
+                        <label class="form-label">專案預付款 (30%)</label>
+                        <input type="number" id="fee-prepayment" class="form-input" placeholder="若有餐飲/佈置需填寫">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">場地保證金 (固定)</label>
+                        <input type="number" id="fee-bond" class="form-input readonly" value="3000" readonly>
                     </div>
                 </div>
                 <ul style="font-size:0.9rem;">
-                    <li><strong>訂金支付：</strong>乙方簽約時應支付訂金以保留檔期。</li>
-                    <li><strong>尾款支付：</strong>餘款應於活動當日入場前付清。</li>
-                    <li><strong>保證金退還：</strong>活動結束後，經甲方檢查場地設備無損壞、垃圾已依規定處理，保證金將全額無息退還。</li>
+                    <li><strong>訂金支付：</strong>乙方簽約時應支付「場地預約訂金」以保留檔期時段。</li>
+                    <li><strong>專案預付款：</strong>若有搭配餐飲或佈置方案，需於活動開始前一個月補足總費用 30% 之款項 (不包含訂金)。</li>
+                    <li><strong>尾款支付：</strong>餘款 (總價扣除場地訂金與 30% 預付款) 加上「場地保證金」，應於活動當日入場前付清。</li>
+                    <li><strong>保證金退還：</strong>活動結束後，經甲方檢查場地設備無損壞、垃圾已依規定處理，保證金將<span class="highlight">當場全額無息退還</span>。</li>
                 </ul>
 
                 <div class="section-title">第四條：取消與變更政策</div>
+                <p style="color:var(--c-red); font-weight:bold; margin-bottom:5px;">
+                    ※ 注意：場地訂金一經支付概不退還，但可保留於一年內延期折抵使用。
+                </p>
                 <ul>
-                    <li>活動日 14 天前通知：退還已付訂金 100%。</li>
-                    <li>活動日 7 至 13 天前通知：退還已付訂金 50%。</li>
-                    <li>活動日 3 至 6 天前通知：退還已付訂金 30%。</li>
-                    <li><span class="highlight">活動日 3 天內（含當日）取消</span>：訂金全額沒收，不予退還。</li>
+                    <li><strong>活動日 31 天前通知：</strong>退還已支付「專案預付款」 100% (場地訂金不退)。</li>
+                    <li><strong>活動日 15 至 30 天前通知：</strong>退還已支付「專案預付款」 50% (場地訂金不退)。</li>
+                    <li><strong>活動日 7 至 14 天前通知：</strong>退還已支付「專案預付款」 30% (場地訂金不退)。</li>
+                    <li><span class="highlight">活動日 7 天內（含當日）取消</span>：場地訂金全額沒收，已支付之「專案預付款」亦不予退還。</li>
                     <li>如遇天災（如颱風高雄市政府宣布停班停課）等不可抗力因素，雙方可協議延期或全額退費。</li>
                 </ul>
 
@@ -238,7 +245,6 @@
     <footer class="footer">© 2025 廢墟 BAR (Ruins BAR). All Rights Reserved.</footer>
 
     <script>
-        // ★★★ 關鍵修正：已更新為您提供的新 GAS 網址 ★★★
         const GAS_APP_URL = "https://script.google.com/macros/s/AKfycbzk5VWXvgDJLoLW_eTYuXIxh_ziCrD9mbRsvtrK-Aulasx4eMt6QT9mzuq3HeQ8UGspxw/exec";
         const MY_LIFF_ID = "2008702134-FRWP0LWx"; 
 
@@ -261,7 +267,7 @@
         });
 
         // ==========================================
-        // 修改版：查詢預約 (包含除錯訊息顯示)
+        // 修改版：查詢預約
         // ==========================================
         async function searchReservation() {
             const name = document.getElementById('booker-name').value.trim();
@@ -272,17 +278,14 @@
                 return Swal.fire({ icon: 'warning', title: '資料不全', text: '請先輸入姓名與電話才能查詢', confirmButtonColor: '#c5a47e' });
             }
 
-            // UI 鎖定
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 查詢中...';
 
             try {
-                // 發送請求
                 const response = await fetch(GAS_APP_URL, {
                     method: "POST",
                     redirect: "follow",
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    // 注意：這裡我們會把電話號碼中的 - 拿掉再送出，增加容錯率
                     body: JSON.stringify({ 
                         type: "SEARCH_RESERVATION", 
                         name: name, 
@@ -295,20 +298,10 @@
                 if (res.status === 'success' && res.found) {
                     const data = res.data;
                     
-                    // 1. 填入活動內容
                     document.getElementById('activity-content').value = data.plan || '';
-                    
-                    // 2. 填入日期
-                    if (data.date) {
-                        datePicker.setDate(data.date);
-                    }
-                    
-                    // 3. 填入金額
-                    if (data.price) {
-                        document.getElementById('fee-rent').value = data.price;
-                    }
+                    if (data.date) { datePicker.setDate(data.date); }
+                    if (data.price) { document.getElementById('fee-rent').value = data.price; }
 
-                    // 4. 解析並填入時間
                     if (data.time && data.time.includes('-')) {
                         const parts = data.time.split('-');
                         document.getElementById('time-start').value = parts[0].trim();
@@ -317,7 +310,6 @@
 
                     Swal.fire({ icon: 'success', title: '已帶入資料', text: '請核對合約內容是否正確', timer: 1500, showConfirmButton: false });
                 } else {
-                    // 抓取後端回傳的版本號
                     let appVer = res.appVersion || '舊版本(未更新成功)'; 
                     let debugInfo = res.debug || '無詳細比對資訊 (代表後端沒更新)';
 

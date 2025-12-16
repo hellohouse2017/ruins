@@ -373,18 +373,20 @@
                 console.log('未設定 LIFF ID');
                 return;
             }
+            // 初始化 LIFF
             liff.init({ liffId: liffId })
             .then(() => {
                 // 初始化成功
-                if (!liff.isLoggedIn()) {
-                    // 如果尚未登入，執行登入 (才能抓到 User ID)
-                    liff.login(); 
+                // ★★★ 修正重點：這裡絕對不要寫 liff.login() ★★★
+                // 這樣一般人開網頁才不會被強制跳轉
+                if (liff.isLoggedIn()) {
+                    console.log("已在 LINE 內或已登入，User ID: " + liff.getContext().userId);
                 } else {
-                    console.log("LIFF Login OK, ID: " + liff.getContext().userId);
+                    console.log("一般瀏覽模式 (未登入 LINE)");
                 }
             })
             .catch((err) => {
-                console.error('LIFF Init failed', err);
+                console.error('LIFF 初始化失敗 (可能是網路問題或非 HTTPS)', err);
             });
         }
 
@@ -872,21 +874,22 @@
                 return;
             }
 
-            // ★★★ 關鍵：獲取 LINE User ID ★★★
+            // ★★★ 修正重點：嘗試獲取 ID，抓不到就算了 (不強制) ★★★
             let lineUserId = "";
-            // 嘗試取得 context
             try {
+                // 檢查是否由 LINE App 開啟 (isInClient) 或是已登入狀態
                 if (liff.isInClient() && liff.getContext() && liff.getContext().userId) {
                     lineUserId = liff.getContext().userId;
                 } else if (liff.isLoggedIn()) {
                     lineUserId = liff.getContext().userId;
                 }
             } catch(e) {
-                console.log("無法獲取 User ID: " + e.message);
+                console.log("訪客模式，無 LINE ID");
             }
             
-            console.log("Sending User ID: " + lineUserId);
+            console.log("Sending User ID: " + (lineUserId || "無 (一般網頁瀏覽)"));
 
+            // --- 以下維持原本的送出邏輯 ---
             const submitBtn = document.querySelector('button[onclick="sendFinalToLine()"]');
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
@@ -917,7 +920,7 @@
                 name: name,
                 phone: phone,
                 email: email,
-                lineUserId: lineUserId, // ★ 將抓到的 ID 傳給後端
+                lineUserId: lineUserId, // 這裡可能是空字串，後端要允許
                 planName: currentPlan.name,
                 totalPrice: bookingData.finalTotal,
                 date: document.getElementById('invDate').innerText,
@@ -926,7 +929,6 @@
                 note: "" 
             };
 
-            // 注意：這裡統一使用 GAS_URL 變數
             fetch(GAS_URL, {
                 method: 'POST',
                 body: JSON.stringify(sheetData),

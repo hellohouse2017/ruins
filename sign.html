@@ -316,31 +316,25 @@
 
                     Swal.fire({ icon: 'success', title: '已帶入資料', text: '請核對合約內容是否正確', timer: 1500, showConfirmButton: false });
                 } else {
-                    // ★★★ 修改重點：顯示後端回傳的除錯訊息 ★★★
-                    // 如果後端有回傳 debug 資訊，就顯示出來，不然顯示預設訊息
-                    let debugInfo = res.debug || '無詳細比對資訊';
-                    
-                    // 如果 debug 是物件，轉成字串方便閱讀
-                    if (typeof debugInfo === 'object') {
-                        debugInfo = JSON.stringify(debugInfo, null, 2);
-                    }
+                    // 抓取後端回傳的版本號
+                    let appVer = res.appVersion || '舊版本(未更新成功)'; 
+                    let debugInfo = res.debug || '無詳細比對資訊 (代表後端沒更新)';
 
                     Swal.fire({ 
                         icon: 'error', 
-                        title: '找不到符合的預約', 
-                        // 使用 HTML 顯示詳細比對狀況
+                        title: '找不到預約', 
                         html: `
                             <div style="text-align:left; font-size:0.9rem; background:#f4f4f4; padding:10px; border-radius:5px;">
+                                <p style="color:blue; font-weight:bold;">後端版本: ${appVer}</p>
                                 <p><strong>您輸入的資料：</strong><br>姓名: ${name}<br>電話: ${phone}</p>
                                 <hr style="margin:5px 0; border:0; border-top:1px dashed #ccc;">
-                                <p style="color:#d33; white-space: pre-wrap;"><strong>後端比對結果：</strong><br>${debugInfo}</p>
+                                <p style="color:#d33; white-space: pre-wrap;"><strong>比對結果：</strong><br>${debugInfo}</p>
                             </div>
-                            <p style="margin-top:10px; font-size:0.8rem; color:#888;">請截圖此畫面傳給管理員，或確認 Google Sheet 資料。</p>
                         `, 
                         confirmButtonColor: '#c5a47e' 
                     });
                 }
-
+                
             } catch (error) {
                 console.error(error);
                 Swal.fire({ icon: 'error', title: '系統錯誤', text: '無法連線至資料庫，請稍後再試。' });

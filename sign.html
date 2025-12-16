@@ -58,9 +58,6 @@
         .btn-search:hover { background-color: #b08d66; }
         .btn-search:disabled { background-color: #ddd; cursor: not-allowed; }
 
-        .inline-input { border: none; border-bottom: 1px solid #888; background: transparent; padding: 0 5px; font-family: var(--font-serif); font-weight: bold; color: var(--c-dark); text-align: center; width: 80px; }
-        .inline-input:focus { outline: none; border-bottom: 2px solid var(--c-gold); }
-
         .section-title { font-family: var(--font-serif); font-size: 1.1rem; color: var(--c-dark); margin: 30px 0 15px; padding-left: 10px; border-left: 4px solid var(--c-gold); font-weight: bold; }
         
         .legal-text { font-size: 0.9rem; color: #444; text-align: justify; line-height: 1.8; }
@@ -69,7 +66,6 @@
         .legal-text li { margin-bottom: 5px; }
         
         .highlight { color: var(--c-red); font-weight: bold; background: #FDEDEC; padding: 0 4px; border-radius: 2px;}
-        .money-val { font-family: monospace; font-weight: bold; color: var(--c-dark); }
 
         /* 簽名區 */
         .signature-section { margin-top: 50px; page-break-inside: avoid; }
@@ -115,6 +111,10 @@
                 <div class="form-group col-full">
                     <label class="form-label">承租方 / 乙方 (Tenant Name)</label>
                     <input type="text" id="booker-name" class="form-input" placeholder="請輸入當初預約的姓名">
+                </div>
+                <div class="form-group col-full">
+                    <label class="form-label">電子信箱 (Email)</label>
+                    <input type="email" id="booker-email" class="form-input" placeholder="請填寫 Email 以接收專案預付款通知">
                 </div>
                 <div class="form-group col-full">
                     <label class="form-label">聯絡電話 (Phone)</label>
@@ -174,8 +174,8 @@
                         <input type="number" id="fee-deposit" class="form-input readonly" value="5000" readonly>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">專案預付款 (30%)</label>
-                        <input type="number" id="fee-prepayment" class="form-input" placeholder="若有餐飲/佈置需填寫">
+                        <label class="form-label">專案預付款 (自動計算)</label>
+                        <input type="number" id="fee-prepayment" class="form-input" placeholder="系統自動判斷" readonly style="background-color:#fff3cd;">
                     </div>
                     <div class="form-group">
                         <label class="form-label">場地保證金 (固定)</label>
@@ -184,7 +184,8 @@
                 </div>
                 <ul style="font-size:0.9rem;">
                     <li><strong>訂金支付：</strong>乙方簽約時應支付「場地預約訂金」以保留檔期時段。</li>
-                    <li><strong>專案預付款：</strong>若有搭配餐飲或佈置方案，需於活動開始前一個月補足總費用 30% 之款項 (不包含訂金)。</li>
+                    <li><strong>專案預付款：</strong>若有搭配餐飲或佈置方案，需於活動開始前一個月補足總費用 30% 之款項 (不包含訂金)。<br>
+                        <span style="color:#d33; font-size:0.85rem;">(註：純場地租借或會議方案，且無額外加購者，此項為 0 元)</span></li>
                     <li><strong>尾款支付：</strong>餘款 (總價扣除場地訂金與 30% 預付款) 加上「場地保證金」，應於活動當日入場前付清。</li>
                     <li><strong>保證金退還：</strong>活動結束後，經甲方檢查場地設備無損壞、垃圾已依規定處理，保證金將<span class="highlight">當場全額無息退還</span>。</li>
                 </ul>
@@ -308,7 +309,32 @@
                         document.getElementById('time-end').value = parts[1].trim();
                     }
 
-                    Swal.fire({ icon: 'success', title: '已帶入資料', text: '請核對合約內容是否正確', timer: 1500, showConfirmButton: false });
+                    // ==========================================
+                    // ★★★ 新增：專案預付款自動計算邏輯 ★★★
+                    // ==========================================
+                    let totalPrice = parseInt(data.price || 0);
+                    let planName = (data.plan || "").toString();
+                    let addonsStr = (data.addons || "").toString();
+
+                    // 1. 判斷是否為「純場地」或「會議」方案
+                    let isSimplePlan = planName.includes("純場地") || planName.includes("會議");
+
+                    // 2. 判斷加購項目 (去掉 "桌"、"椅"、"," 後，如果還有其他字，代表有雜項加購)
+                    let cleanAddons = addonsStr.replace(/桌/g, "").replace(/椅/g, "").replace(/,/g, "").trim();
+                    let hasComplexAddons = (cleanAddons.length > 0);
+
+                    // 3. 計算預付款
+                    let prepayment = 0;
+                    if (isSimplePlan && !hasComplexAddons) {
+                        prepayment = 0;
+                    } else {
+                        prepayment = Math.round(totalPrice * 0.3);
+                    }
+
+                    document.getElementById('fee-prepayment').value = prepayment;
+                    // ==========================================
+
+                    Swal.fire({ icon: 'success', title: '已帶入資料', text: '系統已自動計算專案預付款', timer: 1500, showConfirmButton: false });
                 } else {
                     let appVer = res.appVersion || '舊版本(未更新成功)'; 
                     let debugInfo = res.debug || '無詳細比對資訊 (代表後端沒更新)';
@@ -386,6 +412,7 @@
         async function submitContract() {
             const name = document.getElementById('booker-name').value.trim();
             const phone = document.getElementById('booker-phone').value.trim();
+            const email = document.getElementById('booker-email').value.trim(); // 取得 Email
             const activity = document.getElementById('activity-content').value.trim();
             const dateVal = document.getElementById('date-picker').value;
             const timeStart = document.getElementById('time-start').value;
@@ -393,8 +420,11 @@
             const feeRent = document.getElementById('fee-rent').value;
 
             const phoneRegex = /^09\d{8}$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
             if (!name) return alertAndFocus("請輸入承租方姓名/公司", "booker-name");
+            if (!email) return alertAndFocus("請輸入 Email", "booker-email");
+            if (!emailRegex.test(email)) return alertAndFocus("Email 格式不正確", "booker-email");
             if (!phoneRegex.test(phone)) return alertAndFocus("請輸入正確的手機號碼", "booker-phone");
             if (!activity) return alertAndFocus("請輸入活動主要內容", "activity-content");
             if (!dateVal) return alertAndFocus("請選擇使用日期", "date-picker");
@@ -436,7 +466,7 @@
 
                 btnText.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> 上傳中...';
 
-                // 上傳合約圖片
+                // 上傳合約圖片 (注意：目前後端只有儲存圖片，尚未將 Email 寫回 Google Sheet)
                 const response = await fetch(GAS_APP_URL, {
                     method: "POST",
                     redirect: "follow",

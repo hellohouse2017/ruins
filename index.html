@@ -841,16 +841,45 @@
             submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> 資料登記中...';
             submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
-            // 修正點：這裡的 key 改成對應 GAS 腳本的 planName 和 totalPrice
+            // ==========================================
+            // ★關鍵修正：將加購項目組合成字串
+            // ==========================================
+            let addonsList = [];
+            
+            // 1. 處理計數型項目 (數量 > 0)
+            for (const [id, qty] of Object.entries(addonQuantities)) {
+                if (qty > 0) {
+                    const item = ADDONS_DB.find(a => a.id === id);
+                    if(item) {
+                        let itemStr = `${item.name} x ${qty}${item.unit}`;
+                        // 如果有選擇口味 (例如餐點或飲料)
+                        if (bookingData[`menu_${id}`] && bookingData[`menu_${id}`].length > 0) {
+                            itemStr += ` [${bookingData[`menu_${id}`].join('/')}]`;
+                        }
+                        addonsList.push(itemStr);
+                    }
+                }
+            }
+            // 2. 處理勾選型項目
+            selectedAddons.forEach(id => {
+                const item = ADDONS_DB.find(a => a.id === id);
+                if(item) addonsList.push(item.name);
+            });
+            
+            // 轉成逗號分隔字串，例如："椅子 x 2張, 飲料 x 1桶 [紅茶/綠茶]"
+            const finalAddonsString = addonsList.join(', ');
+            // ==========================================
+
             const sheetData = {
-                type: 'BOOKING',                // 讓 GAS 知道這是預約請求
+                type: 'BOOKING',
                 name: name,
                 phone: phone,
-                planName: currentPlan.name,     // 原本是 plan，改成 planName (或 GAS 裡也要對應)
-                totalPrice: bookingData.finalTotal, // 原本是 total，改成 totalPrice (避免 0)
+                planName: currentPlan.name,
+                totalPrice: bookingData.finalTotal,
                 date: document.getElementById('invDate').innerText,
                 time: document.getElementById('invTimeRange').innerText,
-                note: "" // 如果有備註欄位可以加，目前留空
+                addons: finalAddonsString, // ★這裡傳送剛整理好的字串
+                note: "" 
             };
 
             fetch(GAS_URL, {
